@@ -421,8 +421,8 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .ev{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .ev.mv{cursor:grab}
 .ev.drag{z-index:30;cursor:grabbing;box-shadow:0 6px 16px rgba(0,0,0,.28);transition:none}
-.evctx{position:fixed;z-index:9999;min-width:130px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:4px}
-.evctx button{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:5px;font-size:14px;color:#c0392b;cursor:pointer}
+.evctx{position:fixed;z-index:9999;zoom:var(--zoom,1.15);font-family:var(--font);min-width:130px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:4px}
+.evctx button{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:5px;font-family:var(--font);font-size:14px;color:var(--ink);cursor:pointer}
 .evctx button:hover{background:var(--soft)}
 .ev .rz{position:absolute;left:0;right:0;bottom:0;height:10px;cursor:ns-resize}
 .ev .rz::after{content:"";position:absolute;left:50%;bottom:2px;width:14px;height:2px;margin-left:-7px;border-radius:2px;background:currentColor;opacity:0}
@@ -1306,7 +1306,7 @@ let layoutPref=layoutDefault;
 let mode="planner";try{mode=localStorage.getItem("formiga-mode")||"planner";}catch(e){}
 document.body.dataset.mode=mode;
 const viewKey=()=>mode!=="planner"?mode:(document.body.dataset.view||"semanas");
-const isSwipe=()=>mq.matches&&mode!=="planner";
+const isSwipe=()=>(mq.matches||mode==="notas")&&mode!=="planner";
 let laneIdx=0;
 const ICON_STACK='<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2.5" width="12" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="10.5" width="12" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
 const ICON_SIDE='<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="3" width="6" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="3" width="6" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
@@ -3037,7 +3037,7 @@ function evMenu(b,e){
       const pv=snap();state.events=state.events.filter(y=>y.id!==e.id);save();render();offerUndo(pv,"Compromisso excluído");};
     m.appendChild(bt);document.documentElement.appendChild(m);
     const w=m.offsetWidth,h=m.offsetHeight;
-    m.style.left=Math.max(4,Math.min(x.clientX,innerWidth-w-4))+"px";m.style.top=Math.max(4,Math.min(x.clientY,innerHeight-h-4))+"px";
+    const Z=zoomF();m.style.left=Math.max(4,Math.min(x.clientX/Z,innerWidth/Z-w-4))+"px";m.style.top=Math.max(4,Math.min(x.clientY/Z,innerHeight/Z-h-4))+"px";
     const off=ev=>{if(ev&&ev.type==="keydown"&&ev.key!=="Escape")return;if(ev&&ev.type==="pointerdown"&&m.contains(ev.target))return;evMenuClose();
       document.removeEventListener("pointerdown",off,true);document.removeEventListener("keydown",off,true);window.removeEventListener("scroll",off,true);window.removeEventListener("resize",off);};
     document.addEventListener("pointerdown",off,true);document.addEventListener("keydown",off,true);window.addEventListener("scroll",off,true);window.addEventListener("resize",off);
