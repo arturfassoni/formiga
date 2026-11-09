@@ -420,7 +420,7 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .ev{position:absolute;border:0;border-left:3px solid var(--tone);border-radius:5px;background:color-mix(in srgb,var(--tone) 15%,var(--surface));padding:2px 4px;font-size:11.5px;line-height:1.2;color:var(--tone);overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:1px;font-weight:600}
 .ev .tm{font-size:10px;font-weight:500;opacity:.85;font-variant-numeric:tabular-nums}
 .agempty{font-size:12px;color:var(--muted);margin:8px 2px 0}
-#gedlg .erow{grid-template-columns:1fr 1fr}
+#gedlg .erow{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}.gechk{display:flex;flex-wrap:wrap;gap:4px 16px}.linkbtn{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;padding:2px 0;text-align:left;cursor:pointer}.linkbtn:hover{color:var(--ink)}#gedlg .lnote:empty{display:none}
 a.btn{color:var(--ink);text-decoration:none}
 #gedlg .etitle,#edlg .etitle{flex:1;min-width:0;border:0;background:transparent;font-size:19px;font-weight:700;color:var(--tone);padding:2px 0}
 #edlg .etitle:focus,#gedlg .etitle:focus{outline:none}
@@ -974,16 +974,16 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <input id="geTitle" class="etitle" placeholder="Título" aria-label="Título do evento" enterkeyhint="done">
       <button type="button" class="x" id="geClose" aria-label="Fechar">×</button>
     </div>
-    <label class="chk" id="geAllF"><input type="checkbox" id="geAll"> Dia todo</label>
-    <label class="chk" id="geRepF"><input type="checkbox" id="geRep"> Repete toda semana (fica só no Formiga)</label>
+    <div class="gechk"><label class="chk" id="geAllF"><input type="checkbox" id="geAll"> Dia todo</label><label class="chk" id="geRepF"><input type="checkbox" id="geRep"> Repete toda semana</label></div>
     <div class="erow">
-      <label class="fld"><span>Início</span><input type="date" id="geSD"></label>
-      <label class="fld" id="geSTF"><span>Hora</span><input type="time" id="geST" step="300"></label>
-      <label class="fld" id="geEDF"><span>Fim</span><input type="date" id="geED"></label>
-      <label class="fld" id="geETF"><span>Hora</span><input type="time" id="geET" step="300"></label>
+      <label class="fld"><span>Data</span><input type="date" id="geSD"></label>
+      <label class="fld" id="geSTF"><span>Início</span><input type="time" id="geST" step="300"></label>
+      <label class="fld" id="geETF"><span>Fim</span><input type="time" id="geET" step="300"></label>
+      <label class="fld" id="geEDF"><span>Até</span><input type="date" id="geED"></label>
     </div>
     <label class="fld"><span>Agenda</span><select id="geCal"></select></label>
-    <label class="fld" id="geDescF"><span>Descrição</span><textarea id="geDesc" rows="3" style="border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;font:inherit;font-size:14px;color:var(--ink);resize:vertical"></textarea></label>
+    <button type="button" class="linkbtn" id="geDescBtn">+ Descrição</button>
+    <label class="fld" id="geDescF"><span>Descrição</span><textarea id="geDesc" rows="2" style="border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;font:inherit;font-size:14px;color:var(--ink);resize:vertical"></textarea></label>
     <p class="lnote" id="geNote"></p>
     <div class="dfoot"><a class="btn" id="geLink" target="_blank" rel="noopener">Abrir no Google</a><span class="where"></span><button type="button" class="btn danger" id="geDel">Excluir</button><button type="button" class="btn" id="geSave">Salvar</button></div>
   </div>
@@ -2993,7 +2993,7 @@ function agendaEl(){
   days.forEach((d,di)=>{
     const col=document.createElement("div");col.className="agcol"+(iso(d)===today?" today":"");col.style.height=(H*hp)+"px";
     
-    col.addEventListener("click",e=>{if(e.target!==col)return;const y=e.offsetY;const m=lo+Math.floor(y/hp*2)*30;newAny(iso(d),m);});
+    col.addEventListener("click",e=>{if(e.target!==col)return;const r=col.getBoundingClientRect(),y=(e.clientY-r.top)/((r.height/col.offsetHeight)||1);const m=Math.max(lo,Math.min(hi-30,lo+Math.floor(y/hp*2)*30));newAny(iso(d),m);});
     const list=evs[di].slice().sort((a,b)=>toMin(a.start)-toMin(b.start));
     const lanes=[],laneOf=new Map();list.forEach(e=>{let i=lanes.findIndex(end=>end<=toMin(e.start));if(i<0){i=lanes.length;lanes.push(0);}lanes[i]=toMin(e.end);laneOf.set(e,i);});
     list.forEach(e=>{
@@ -3310,7 +3310,7 @@ function gReason(e){
 }
 function gDT(raw){const d=new Date(raw);return {d:iso(d),t:fmtMin(d.getHours()*60+d.getMinutes())};}
 function openGEdit(e,pre){
-  geCur=e||null;geDelArm=0;
+  geCur=e||null;geDelArm=0;geDescOn=false;
   const cals=calList.filter(gWritable);
   const sel=$("#geCal");sel.innerHTML="";
   cals.forEach(c=>{const o=document.createElement("option");o.value=c.id;o.textContent=c.name;sel.appendChild(o);});
@@ -3343,15 +3343,20 @@ function openGEdit(e,pre){
 function geFm(){return $("#geCal").value==="__f";}
 function geAllUI(){
   const fm=geFm(),all=$("#geAll").checked&&!fm;
-  $("#geAllF").style.display=fm?"none":"";$("#geEDF").style.display=fm?"none":"";$("#geDescF").style.display=fm?"none":"";
+  const multi=$("#geED").value&&$("#geED").value!==$("#geSD").value,showD=!fm&&($("#geDesc").value||geDescOn);
+  $("#geAllF").style.display=fm?"none":"";$("#geEDF").style.display=(!fm&&(all||multi))?"":"none";
+  $("#geDescF").style.display=showD?"":"none";$("#geDescBtn").style.display=(fm||showD)?"none":"";
   $("#geSTF").style.display=all?"none":"";$("#geETF").style.display=all?"none":"";
-  if(!$("#geNote").dataset.fixed)$("#geNote").textContent=fm?($("#geRep").checked?"Vai se repetir toda semana, no mesmo dia da semana.":"Este compromisso fica só no Formiga, não vai para o Google Agenda."):(calCanWrite?"":"Para salvar, o Formiga precisa da sua permissão para editar eventos. Ao salvar, o Google vai pedir.");
+  if(!$("#geNote").dataset.fixed)$("#geNote").textContent=fm?($("#geRep").checked?"Vai se repetir toda semana, no mesmo dia da semana.":""):(calCanWrite?"":"Para salvar, o Formiga precisa da sua permissão para editar eventos. Ao salvar, o Google vai pedir.");
 }
-let gePrevCal="";
+let gePrevCal="",geDescOn=false;
+$("#geDescBtn").onclick=()=>{geDescOn=true;geAllUI();$("#geDesc").focus();};
 $("#geRep").addEventListener("change",()=>{const sel=$("#geCal");if($("#geRep").checked){gePrevCal=sel.value;sel.value="__f";sel.disabled=true;}else{sel.disabled=false;if(gePrevCal)sel.value=gePrevCal;}geAllUI();});
 $("#geCal").addEventListener("change",geAllUI);
 $("#geAll").addEventListener("change",geAllUI);
-$("#geSD").addEventListener("change",()=>{if($("#geED").value<$("#geSD").value)$("#geED").value=$("#geSD").value;});
+let geSDprev="";$("#geSD").addEventListener("focus",()=>{geSDprev=$("#geSD").value;});
+$("#geSD").addEventListener("change",()=>{const ed=$("#geED");if(!ed.value||ed.value===geSDprev||ed.value<$("#geSD").value)ed.value=$("#geSD").value;geSDprev=$("#geSD").value;geAllUI();});
+$("#geED").addEventListener("change",geAllUI);
 $("#geTitle").addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();ev.target.blur();}});
 $("#geClose").onclick=()=>gedlg.close();
 gedlg.addEventListener("click",e=>{if(e.target===gedlg)gedlg.close();});
