@@ -17,6 +17,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+(function(){try{var t=localStorage.getItem("formiga-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);
+var z=localStorage.getItem("formiga-zoom");document.documentElement.style.setProperty("--zoom",z&&+z>=1&&+z<=1.5?z:"1.15");}catch(e){document.documentElement.style.setProperty("--zoom","1.15");}})();
+</script>
 <style>
 :root{
   --bg:#F2F4F1; --surface:#FFFFFF; --ink:#1C2320; --muted:#6A736E; --line:#DFE3DD; --soft:#E9ECE7; --now:#E7EFE3;
@@ -43,7 +47,7 @@
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased}
+body{zoom:var(--zoom,1.15);margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
 button{font:inherit;color:inherit;cursor:pointer}
 input,textarea{font:inherit;color:inherit}
@@ -412,7 +416,7 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .agtimes{position:relative}
 .agt{position:absolute;right:6px;font-size:10.5px;color:var(--muted);transform:translateY(-6px);font-variant-numeric:tabular-nums}
 .agcol{position:relative;border-left:1px solid var(--line);cursor:default;background-image:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent var(--hp))}
-.agcol.today{background-color:var(--now)}
+.agcol.today{background-color:transparent}
 .ev{position:absolute;border:0;border-left:3px solid var(--tone);border-radius:5px;background:color-mix(in srgb,var(--tone) 15%,var(--surface));padding:2px 4px;font-size:11.5px;line-height:1.2;color:var(--tone);overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:1px;font-weight:600}
 .ev .tm{font-size:10px;font-weight:500;opacity:.85;font-variant-numeric:tabular-nums}
 .agempty{font-size:12px;color:var(--muted);margin:8px 2px 0}
@@ -444,6 +448,7 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .modes button.hid{display:none}
 .modes.single{display:none}
 .menurow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;font-size:13px}
+.menurow label{flex:1}
 .menurow select{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 6px}
 body[data-mode="planner"].hidedone .list:not([data-list^="perm|"]) .card.done{display:none}
 body[data-view="feitos"][data-mode="planner"] .layoutbtn{visibility:hidden}
@@ -729,6 +734,10 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <button id="weekNumBtn" class="plannerOnly"></button>
       <div class="menurow plannerOnly" id="wsRow"><label for="wsSel">Semana começa</label>
         <select id="wsSel"><option value="1">segunda</option><option value="2">terça</option><option value="3">quarta</option><option value="4">quinta</option><option value="5">sexta</option><option value="6">sábado</option><option value="0">domingo</option></select></div>
+      <div class="menurow" id="themeRow"><label for="themeSel">Tema</label>
+        <select id="themeSel"><option value="auto">Automático</option><option value="light">Claro</option><option value="dark">Escuro</option></select></div>
+      <div class="menurow" id="zoomRow"><label for="zoomSel">Tamanho</label>
+        <select id="zoomSel"><option value="1">Pequeno</option><option value="1.15">Médio</option><option value="1.3">Grande</option><option value="1.45">Muito grande</option></select></div>
       <button id="distBtn">Distinção</button>
       <button id="filtBtn" class="plannerOnly">Filtros</button>
       <hr class="msep">
@@ -742,6 +751,7 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <hr class="msep">
       <button id="gMenu" hidden></button>
       <button id="calMenu" hidden></button>
+      <button id="calColorsBtn" hidden>Cores da Google Agenda</button>
       <button id="exportBtn">Salvar cópia de segurança</button>
       <button id="importBtn">Restaurar cópia de segurança</button>
       <button id="resetBtn">Apagar tudo e começar do zero</button>
@@ -894,6 +904,13 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <button type="button" class="btn primary" id="xSend">Interpretar</button>
     </div>
     <div id="xOut"></div>
+  </div>
+</dialog>
+<dialog id="cldlg">
+  <div class="sheet">
+    <div class="dhead"><h3>Cores da Google Agenda</h3><button type="button" class="x" id="clClose" aria-label="Fechar">×</button></div>
+    <p class="lnote">Escolha a cor de cada agenda como aparece no Formiga. “Padrão” volta à cor do Google.</p>
+    <div id="clList"></div>
   </div>
 </dialog>
 <dialog id="gvdlg">
@@ -1632,6 +1649,12 @@ function hdBox(c){
   const tt=document.createElement("div");tt.className="hd-t";tt.textContent=c.name+(symOn()?"\u00a0\u00a0"+symOf(c,i):"");d.appendChild(tt);
   return d;
 }
+function timeLabW(rows,mob){
+  const cv=boxLabW.c||(boxLabW.c=document.createElement("canvas")),ctx=cv.getContext("2d");
+  ctx.font="700 "+(mob?13:15)+"px Figtree, system-ui, sans-serif";let w=0;
+  ["Semana","Próxima"].concat(rows.map(r=>blockName(r.t))).forEach(t=>{w=Math.max(w,ctx.measureText(t).width);});
+  return Math.ceil(Math.min(w+(mob?26:32),150));
+}
 function boxLabW(areas,mob){
   const cv=boxLabW.c||(boxLabW.c=document.createElement("canvas")),ctx=cv.getContext("2d");
   ctx.font="700 "+(mob?13:15)+"px Figtree, system-ui, sans-serif";let w=0;
@@ -1653,7 +1676,7 @@ function renderTable(){
   if(!times.length||!areas.length)return;
   const tr=mob?!(SEL.areas&&SEL.areas.length===1&&!(SEL.blocks&&SEL.blocks.length===1)):TR;
   const rows=tr?areas:times,cols=tr?times:areas;
-  const LAB=tr?boxLabW(areas,mob):(mob?110:150),scroll=!mob&&tr;
+  const LAB=tr?boxLabW(areas,mob):timeLabW(rows,mob),scroll=!mob&&tr;
   W.classList.add("ptable");W.classList.toggle("scrollx",scroll);W.style.setProperty("--lab",LAB+"px");
   const colW=mob?"minmax(0,1fr)":(tr?Math.max(230,Math.floor(((W.clientWidth||1000)-LAB)/Math.max(1,cols.length)))+"px":"minmax(0,1fr)");
   const tmpl=LAB+"px repeat("+cols.length+","+colW+")";
@@ -2339,6 +2362,21 @@ $("#wnoteBtn").onclick=()=>{state.prefs=state.prefs||{};state.prefs.hideWeekNote
 function updateHideDoneBtn(){updToggles();$("#hideDoneBtn").textContent=(state.prefs&&state.prefs.hideDone)?"Mostrar concluídas":"Ocultar concluídas";}
 $("#hideDoneBtn").onclick=()=>{state.prefs=state.prefs||{};state.prefs.hideDone=!state.prefs.hideDone;save();render();updateHideDoneBtn();};
 updateHideDoneBtn();
+$("#themeRow").addEventListener("click",e=>e.stopPropagation());
+$("#zoomRow").addEventListener("click",e=>e.stopPropagation());
+(function(){
+  const R=document.documentElement,ts=$("#themeSel"),zs=$("#zoomSel");
+  let t="auto",z="1.15";try{t=localStorage.getItem("formiga-theme")||"auto";z=localStorage.getItem("formiga-zoom")||"1.15";}catch(e){}
+  if(!["auto","light","dark"].includes(t))t="auto";
+  if(![...zs.options].some(o=>o.value===z))z="1.15";
+  ts.value=t;zs.value=z;
+  function meta(){const dark=R.dataset.theme==="dark"||(R.dataset.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.remove());
+    const m=document.createElement("meta");m.name="theme-color";m.content=dark?"#151918":"#F2F4F1";document.head.appendChild(m);}
+  ts.onchange=()=>{const v=ts.value;if(v==="auto")R.removeAttribute("data-theme");else R.setAttribute("data-theme",v);try{localStorage.setItem("formiga-theme",v);}catch(e){}meta();};
+  zs.onchange=()=>{R.style.setProperty("--zoom",zs.value);try{localStorage.setItem("formiga-zoom",zs.value);}catch(e){}};
+  meta();
+})();
 $("#wsRow").addEventListener("click",e=>e.stopPropagation());
 $("#wsSel").value=String(weekStartDay());
 $("#wsSel").addEventListener("change",e=>setWeekStart(parseInt(e.target.value,10)));
@@ -2830,7 +2868,7 @@ function calOnToken(r){
   state.prefs=state.prefs||{};if(!state.prefs.showAgenda){state.prefs.showAgenda=true;save();}
   render();
 }
-function calUI(){const m=$("#calMenu");if(!gConfigured){m.hidden=true;return;}m.hidden=false;m.textContent=calWanted()?"Ocultar Google Agenda":"Mostrar Google Agenda";}
+function calUI(){const m=$("#calMenu");if(!gConfigured){m.hidden=true;return;}m.hidden=false;m.textContent=calWanted()?"Ocultar Google Agenda":"Mostrar Google Agenda";$("#calColorsBtn").hidden=!calWanted();}
 $("#calMenu").onclick=()=>{
   if(calWanted()){try{localStorage.setItem("formiga-gcal","0");}catch(e){}calToken=null;calCache={};calKey="";calUI();render();toast("Google Agenda oculto");}
   else calAsk(true);
@@ -2851,13 +2889,16 @@ async function calLoad(from,to,key){
   try{
     const cl=await calF("https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader&maxResults=50");
     const cals=(cl.items||[]).filter(c=>c.selected!==false&&!c.hidden);
+    calList=cals.map(c=>({id:c.id,name:c.summaryOverride||c.summary||c.id,color:c.backgroundColor||"#4a7a"}));
+    try{localStorage.setItem("formiga-callist",JSON.stringify(calList));}catch(e){}
+    if(!calPal){try{const pc=await calF("https://www.googleapis.com/calendar/v3/colors");calPal=pc.event||{};}catch(e){calPal={};}}
     const out={};
     await Promise.all(cals.map(async c=>{
       const u="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(c.id)+"/events?singleEvents=true&orderBy=startTime&maxResults=250&timeMin="+encodeURIComponent(from.toISOString())+"&timeMax="+encodeURIComponent(to.toISOString());
       const ev=await calF(u);
       (ev.items||[]).forEach(e=>{
         if(e.status==="cancelled")return;
-        const base={google:true,title:e.summary||"(sem título)",hex:c.backgroundColor||"#4a7",link:e.htmlLink,cal:c.summaryOverride||c.summary||""};
+        const base={google:true,title:e.summary||"(sem título)",hex:calColor(c,e),link:e.htmlLink,cal:c.summaryOverride||c.summary||""};
         if(e.start&&e.start.date){
           let d=parseISO(e.start.date);const end=parseISO(e.end.date);
           while(d<end){const k=iso(d);(out[k]=out[k]||[]).push(Object.assign({allDay:true,start:"",end:""},base));d=addDays(d,1);}
@@ -2872,6 +2913,32 @@ async function calLoad(from,to,key){
     if(!isBusy())render();
   }catch(e){if(String(e.message)==="auth")render();}
 }
+let calList=[],calPal=null;try{calList=JSON.parse(localStorage.getItem("formiga-callist")||"[]")||[];}catch(e){}
+let calOv={};try{calOv=JSON.parse(localStorage.getItem("formiga-calcolors")||"{}")||{};}catch(e){}
+function calColor(c,e){
+  if(calOv[c.id])return calOv[c.id];
+  if(e&&e.colorId&&calPal&&calPal[e.colorId])return calPal[e.colorId].background;
+  return c.backgroundColor||"#4a7";
+}
+function calOvSave(){try{localStorage.setItem("formiga-calcolors",JSON.stringify(calOv));}catch(e){}}
+const cldlg=$("#cldlg");
+function openCalColors(){
+  const box=$("#clList");box.textContent="";
+  if(!calList.length){const p=document.createElement("p");p.className="lnote";p.textContent="Abra a Agenda do app com o Google Agenda ligado e tente de novo.";box.appendChild(p);}
+  calList.forEach(c=>{
+    const row=document.createElement("div");row.className="menurow";row.style.padding="4px 0";
+    const lb=document.createElement("label");lb.textContent=c.name;lb.style.flex="1";
+    const inp=document.createElement("input");inp.type="color";inp.value=/^#[0-9a-f]{6}$/i.test(calOv[c.id]||c.color)?(calOv[c.id]||c.color):"#4a7a4a";
+    inp.oninput=()=>{calOv[c.id]=inp.value;calOvSave();calKey="";render();};
+    const rs=document.createElement("button");rs.type="button";rs.className="btn ghost";rs.textContent="Padrão";
+    rs.onclick=()=>{delete calOv[c.id];calOvSave();inp.value=/^#[0-9a-f]{6}$/i.test(c.color)?c.color:"#4a7a4a";calKey="";render();};
+    row.append(lb,inp,rs);box.appendChild(row);
+  });
+  cldlg.showModal();
+}
+$("#clClose").onclick=()=>cldlg.close();
+cldlg.addEventListener("click",e=>{if(e.target===cldlg)cldlg.close();});
+$("#calColorsBtn").onclick=openCalColors;
 function gEventsOn(d){return (calWanted()&&calCache[iso(d)]||[]).filter(e=>!e.allDay);}
 function allDayRow(days){
   if(!calWanted())return null;
