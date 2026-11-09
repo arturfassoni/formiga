@@ -418,6 +418,13 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .agcol{position:relative;border-left:1px solid var(--line);cursor:default;background-image:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent var(--hp))}
 .agcol.today{background-color:transparent}
 .ev{position:absolute;border:0;border-left:3px solid var(--tone);border-radius:5px;background:color-mix(in srgb,var(--tone) 15%,var(--surface));padding:2px 4px;font-size:11.5px;line-height:1.2;color:var(--tone);overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:1px;font-weight:600}
+.ev{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.ev.mv{cursor:grab}
+.ev.drag{z-index:30;cursor:grabbing;box-shadow:0 6px 16px rgba(0,0,0,.28);transition:none}
+.ev .rz{position:absolute;left:0;right:0;bottom:0;height:9px;cursor:ns-resize}
+.ev .rz::after{content:"";position:absolute;left:50%;bottom:2px;width:14px;height:2px;margin-left:-7px;border-radius:2px;background:currentColor;opacity:0}
+.ev:hover .rz::after,.ev.drag .rz::after{opacity:.4}
+@media (pointer:coarse){.ev .rz{height:12px}}
 .ev .tm{font-size:10px;font-weight:500;opacity:.85;font-variant-numeric:tabular-nums}
 .agempty{font-size:12px;color:var(--muted);margin:8px 2px 0}
 #gedlg .erow{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}.gechk{display:flex;flex-wrap:wrap;gap:4px 16px}.linkbtn{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;padding:2px 0;text-align:left;cursor:pointer}.linkbtn:hover{color:var(--ink)}#gedlg .lnote:empty{display:none}
@@ -2071,7 +2078,6 @@ function listActs(s,isNote){
   });
   const armed=armSDel===s.id;
   mk("delb"+(armed?" arm":""),armed?"Toque de novo para excluir":(isNote?"Excluir nota":"Excluir lista"),'<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5"/>',()=>{
-    if(armSDel!==s.id){armSDel=s.id;render();return;}
     const pv=snap();ids.forEach(id=>delete state.cards[id]);delete state.lists["L|"+s.id];
     state[K().items]=state[K().items].filter(x=>x.id!==s.id);openSMenu=null;armSDel=null;save();render();offerUndo(pv,isNote?"Nota excluída":"Lista excluída");
   });
@@ -2248,7 +2254,6 @@ function drawCats(focusId){
     else{del.className="ib";del.innerHTML='<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
     del.setAttribute("aria-label","Excluir caixa");del.disabled=state[K().cats].length<=1;
     del.onclick=()=>{
-      if(armCat!==c.id){armCat=c.id;drawCats();return;}
       const pv=snap();const dest=state[K().cats].find(x=>x.id!==c.id);
       state[K().items].forEach(s=>{if(s.cat===c.id)s.cat=dest.id;});
       state[K().cats]=state[K().cats].filter(x=>x.id!==c.id);armCat=null;save();drawCats();offerUndo(pv,"Caixa excluída");
@@ -2516,7 +2521,6 @@ $("#dMove").onclick=()=>{
   save();dlg.close();
 };
 $("#dDel").onclick=()=>{
-  if(!delArmed){delArmed=true;drawDialog();return;}
   const pv=snap();removeFromLists(curId);delete state.cards[curId];save();dlg.close();offerUndo(pv,"Tarefa excluída");
 };
 
@@ -2544,7 +2548,7 @@ function drawLists(focusId){
     if(armDel===c.id){del.className="ib arm";del.textContent="Excluir?";}
     else{del.className="ib";del.innerHTML='<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
     del.setAttribute("aria-label","Excluir lista");del.disabled=state.cols.length<=1;
-    del.onclick=()=>{if(armDel!==c.id){armDel=c.id;drawLists();return;}deleteCol(c.id);};
+    del.onclick=()=>deleteCol(c.id);
     r1.append(dot,inp,del);row.appendChild(r1);
     if(armDel===c.id){const p=document.createElement("p");p.className="lnote";p.textContent="Os cards desta caixa vão para Planos.";row.appendChild(p);}
     if(openPal===c.id)row.appendChild(pickers(c,i,()=>drawLists(),true));
@@ -2812,6 +2816,7 @@ function snap(){return JSON.stringify(state);}
 function offerUndo(prev,msg){
   const u=$("#utoast");u.firstChild.textContent=msg;u.classList.add("show");clearTimeout(offerUndo._t);
   u.lastChild.onclick=()=>{
+    if(typeof prev==="function"){u.classList.remove("show");prev();return;}
     let s=null;try{s=JSON.parse(prev);}catch(e){return;}
     state=s;save();u.classList.remove("show");
     if($("#ldlg").open)drawLists();if($("#cdlg").open)drawCats();
@@ -2931,7 +2936,7 @@ function agLabel(days){
 function agSwipe(box){
   let sx=null,sy=null;
   box.addEventListener("touchstart",e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;},{passive:true});
-  box.addEventListener("touchend",e=>{if(sx==null)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;sx=null;
+  box.addEventListener("touchend",e=>{if(sx==null)return;if(evDragging||Date.now()-evDragEnd<500){sx=null;return;}const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;sx=null;
     if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)agShift(dx<0?1:-1);},{passive:true});
   let wx=0,wt=null;
   box.addEventListener("wheel",e=>{if(Math.abs(e.deltaX)<=Math.abs(e.deltaY))return;e.preventDefault();wx+=e.deltaX;clearTimeout(wt);wt=setTimeout(()=>{wx=0;},300);
@@ -2991,6 +2996,7 @@ function agendaEl(){
   const tl=document.createElement("div");tl.className="agtimes";tl.style.height=(H*hp)+"px";
   for(let i=1;i<H;i++){const t=document.createElement("span");t.className="agt";t.style.top=(i*hp)+"px";t.textContent=fmtMin(lo+i*60).replace(":00","h");tl.appendChild(t);}
   body.appendChild(tl);
+  const cols=[];
   days.forEach((d,di)=>{
     const col=document.createElement("div");col.className="agcol"+(iso(d)===today?" today":"");col.style.height=(H*hp)+"px";
     
@@ -3005,14 +3011,90 @@ function agendaEl(){
       b.style.top=((s-lo)/60*hp+1)+"px";b.style.height=Math.max(16,(en-s)/60*hp-2)+"px";
       b.style.left="calc("+(laneOf.get(e)/n*100)+"% + 2px)";b.style.width="calc("+(100/n)+"% - 4px)";
       b.innerHTML='<span class="nm"></span><span class="tm"></span>';b.firstChild.textContent=e.title||"(sem nome)";b.lastChild.textContent=e.start+"–"+e.end;
-      b.onclick=ev=>{ev.stopPropagation();if(e.google)openGEvent(e);else openEvent(e.id);};col.appendChild(b);
+      b.onclick=ev=>{ev.stopPropagation();if(Date.now()-evDragEnd<400)return;if(e.google)openGEvent(e);else openEvent(e.id);};col.appendChild(b);cols[di]=col;evDrag(b,e,cols,days,di,lo,hp);
     });
-    body.appendChild(col);
+    cols[di]=col;body.appendChild(col);
   });
   box.append(head);const adr=allDayRow(days);if(adr)box.appendChild(adr);box.append(body);
   agSwipe(box);
   return box;
 }
+/* ---------- Arrastar e redimensionar eventos na grade ---------- */
+let evDragging=false,evDragEnd=0;
+function evDrag(b,e,cols,days,di,lo,hp){
+  if(e.google){
+    if(gReason(e)||!e.gid||e.allDay||!e.sRaw||!e.eRaw||iso(new Date(e.sRaw))!==iso(new Date(e.eRaw)))return;
+  }
+  const rz=document.createElement("span");rz.className="rz";b.appendChild(rz);b.classList.add("mv");
+  b.addEventListener("contextmenu",x=>{if(evDragging)x.preventDefault();});
+  b.addEventListener("pointerdown",ev=>{
+    if(ev.button>0||evDragging)return;
+    const mode=ev.target===rz?"rz":"mv",touch=ev.pointerType!=="mouse",x0=ev.clientX,y0=ev.clientY;
+    const s0=toMin(e.start),e0=toMin(e.end),ratio=(cols[di].getBoundingClientRect().height/cols[di].offsetHeight)||1;
+    const tm=b.querySelector(".tm");
+    let active=false,timer=null,cur={di,s:s0,e:e0};
+    const tmv=t=>{if(active)t.preventDefault();};
+    const begin=()=>{active=true;evDragging=true;b.classList.add("drag");try{b.setPointerCapture(ev.pointerId);}catch(x){}if(navigator.vibrate)try{navigator.vibrate(12);}catch(x){}};
+    const cleanup=()=>{clearTimeout(timer);b.removeEventListener("pointermove",mv);b.removeEventListener("pointerup",up);b.removeEventListener("pointercancel",cn);document.removeEventListener("touchmove",tmv);};
+    const mv=m=>{
+      if(!active){
+        if(Math.hypot(m.clientX-x0,m.clientY-y0)<(touch?8:4))return;
+        if(touch){cleanup();return;}
+        begin();
+      }
+      m.preventDefault();
+      const dm=Math.round((m.clientY-y0)/ratio/hp*60/15)*15;
+      let ns=s0,ne=e0,nd=cur.di;
+      if(mode==="rz"){ne=Math.max(s0+15,Math.min(hi24(lo,cols,hp),e0+dm));}
+      else{
+        const dur=e0-s0,top=hi24(lo,cols,hp);
+        ns=Math.max(lo,Math.min(top-dur,s0+dm));ne=ns+dur;
+        for(let i=0;i<cols.length;i++){const r=cols[i].getBoundingClientRect();if(m.clientX>=r.left&&m.clientX<r.right){nd=i;break;}}
+      }
+      cur={di:nd,s:ns,e:ne};
+      if(b.parentNode!==cols[nd])cols[nd].appendChild(b);
+      b.style.left="2px";b.style.width="calc(100% - 4px)";
+      b.style.top=((ns-lo)/60*hp+1)+"px";b.style.height=Math.max(16,(ne-ns)/60*hp-2)+"px";
+      if(tm)tm.textContent=fmtMin(ns)+"–"+fmtMin(Math.min(ne,1439));
+    };
+    const up=()=>{
+      cleanup();if(!active)return;
+      evDragging=false;evDragEnd=Date.now();b.classList.remove("drag");
+      const ns=cur.s,ne=Math.min(cur.e,1439);
+      if(cur.di===di&&ns===s0&&ne===e0){render();return;}
+      evCommit(e,days[cur.di],ns,ne);
+    };
+    const cn=()=>{cleanup();if(active){evDragging=false;evDragEnd=Date.now();render();}};
+    b.addEventListener("pointermove",mv);b.addEventListener("pointerup",up);b.addEventListener("pointercancel",cn);
+    if(touch){document.addEventListener("touchmove",tmv,{passive:false});timer=setTimeout(begin,380);}
+  });
+}
+function hi24(lo,cols,hp){return lo+Math.round(cols[0].offsetHeight/hp*60);}
+function evCommit(e,date,ns,ne){
+  if(!e.google){
+    const before=JSON.stringify(state);
+    if(e.day!=null&&!e.date)e.day=date.getDay();else e.date=iso(date);
+    e.start=fmtMin(ns);e.end=fmtMin(ne);save();render();
+    offerUndo(before,"Compromisso movido");return;
+  }
+  if(!calCanWrite||!calValid()){calAsk(true);toast("Autorize a edição no Google e arraste de novo");render();return;}
+  const TZ=Intl.DateTimeFormat().resolvedOptions().timeZone,k=iso(date);
+  const a=new Date(k+"T"+fmtMin(ns)),z=new Date(k+"T"+fmtMin(ne));
+  const old={sRaw:e.sRaw,eRaw:e.eRaw,etag:e.etag};
+  const url=GBASE+encodeURIComponent(e.cid)+"/events/"+encodeURIComponent(e.gid)+"?sendUpdates=none";
+  const oldKey=iso(new Date(e.sRaw));
+  const lst=calCache[oldKey];if(lst){const i=lst.indexOf(e);if(i>=0)lst.splice(i,1);}
+  e.start=fmtMin(ns);e.end=fmtMin(ne);e.sRaw=a.toISOString();e.eRaw=z.toISOString();(calCache[k]=calCache[k]||[]).push(e);
+  render();
+  gApi("PATCH",url,{start:{dateTime:e.sRaw,timeZone:TZ},end:{dateTime:e.eRaw,timeZone:TZ}},old.etag).then(r=>{
+    if(r&&r.etag)e.etag=r.etag;
+    calKey="";
+    offerUndo(async()=>{
+      try{await gApi("PATCH",url,{start:{dateTime:old.sRaw,timeZone:TZ},end:{dateTime:old.eRaw,timeZone:TZ}});calKey="";calCache={};render();toast("Desfeito");}catch(x){gErr(x);}
+    },"Evento movido");
+  }).catch(x=>{gErr(x);calKey="";calCache={};render();});
+}
+
 function newAny(date,startMin){
   if(calWanted()&&calList.some(c=>c.role==="owner"||c.role==="writer"))openGEdit(null,{d:date,m:startMin});
   else newEvent(date,startMin);
@@ -3423,10 +3505,15 @@ $("#geSave").onclick=async()=>{
 };
 $("#geDel").onclick=async()=>{
   const e=geCur;if(!e||geBusy)return;
-  if(Date.now()-geDelArm>4000){geDelArm=Date.now();$("#geDel").classList.add("arm");$("#geDel").textContent="Toque de novo para excluir";setTimeout(()=>{if(Date.now()-geDelArm>=3900){$("#geDel").classList.remove("arm");$("#geDel").textContent="Excluir";}},4000);return;}
   if(!calCanWrite||!calValid()){calAsk(true);toast("Autorize a edição no Google e tente de novo");return;}
   geBusy=true;
-  try{await gApi("DELETE",GBASE+encodeURIComponent(e.cid)+"/events/"+encodeURIComponent(e.gid)+"?sendUpdates=none");gDone("Evento excluído do Google Agenda");}
+  try{await gApi("DELETE",GBASE+encodeURIComponent(e.cid)+"/events/"+encodeURIComponent(e.gid)+"?sendUpdates=none");gDone("Evento excluído");
+    offerUndo(async()=>{
+      const b={summary:e.title==="(sem título)"?"":e.title,description:e.desc||""};
+      if(e.allDay){b.start={date:e.sRaw};b.end={date:e.eRaw};}else{b.start={dateTime:e.sRaw};b.end={dateTime:e.eRaw};}
+      if(e.fcolor)b.extendedProperties={private:{fcolor:e.fcolor}};
+      try{await gApi("POST",GBASE+encodeURIComponent(e.cid)+"/events",b);calKey="";calCache={};render();toast("Evento restaurado");}catch(x){gErr(x);}
+    },"Evento excluído");}
   catch(x){gErr(x);}
   finally{geBusy=false;}
 };
