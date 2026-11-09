@@ -420,8 +420,10 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .ev{position:absolute;border:0;border-left:3px solid var(--tone);border-radius:5px;background:color-mix(in srgb,var(--tone) 15%,var(--surface));padding:2px 4px;font-size:11.5px;line-height:1.2;color:var(--tone);overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:1px;font-weight:600}
 .ev .tm{font-size:10px;font-weight:500;opacity:.85;font-variant-numeric:tabular-nums}
 .agempty{font-size:12px;color:var(--muted);margin:8px 2px 0}
-#edlg .etitle{flex:1;min-width:0;border:0;background:transparent;font-size:19px;font-weight:700;color:var(--tone);padding:2px 0}
-#edlg .etitle:focus{outline:none}
+#gedlg .erow{grid-template-columns:1fr 1fr}
+a.btn{color:var(--ink);text-decoration:none}
+#gedlg .etitle,#edlg .etitle{flex:1;min-width:0;border:0;background:transparent;font-size:19px;font-weight:700;color:var(--tone);padding:2px 0}
+#edlg .etitle:focus,#gedlg .etitle:focus{outline:none}
 .erow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
 .fld select{border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;font-size:15px;color:var(--ink)}
 .chk{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
@@ -436,7 +438,8 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
   .agnav .ib{width:20px}
   #agAdd{padding:3px 9px!important;font-size:15px!important;font-weight:600}
 }
-@media (max-width:860px){#agAdd .lg{display:none}#agAdd .sm{display:inline}#agAdd{padding:4px 10px;font-size:12.5px}.agenda{--hp:30px;padding:8px 6px 10px}.aghead,.agbody{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.ev{font-size:10.5px;padding:2px 3px}}
+#agAddG .sm{display:none}
+@media (max-width:860px){#agAdd .lg,#agAddG .lg{display:none}#agAdd .sm,#agAddG .sm{display:inline}#agAdd{padding:4px 10px;font-size:12.5px}.agenda{--hp:30px;padding:8px 6px 10px}.aghead,.agbody{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.ev{font-size:10.5px;padding:2px 3px}}
 .brand.abrand{margin:2px 0 0;justify-content:center}
 .brand.abrand svg{width:76px;height:76px}
 .help .lead{font-size:15px;text-align:center;color:var(--ink);padding:0 6px 4px}
@@ -578,6 +581,7 @@ body[data-view="feitos"][data-mode="planner"] #colhead{display:none}
 .ab.arm{background:var(--c-red);color:#fff}
 .ab.delb:hover{color:var(--c-red)}
 .nfoot{margin-top:4px}
+#listsBtn,#catsBtn{display:none!important}
 body.closed .wrap,body.closed .pager,body.closed .fab,body.closed #goNow,body.closed #agBtn,body.closed #listsBtn,body.closed #catsBtn,body.closed #todayInfo{display:none!important}
 .focusbtn{border:0;background:none;padding:2px;margin-left:-2px;margin-right:auto;color:var(--muted);display:inline-flex;align-items:center;cursor:pointer;border-radius:6px}
 .focusbtn:hover,.focusbtn.on{color:var(--ink)}
@@ -734,6 +738,10 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
   .addbtn{opacity:1}
   .list{min-height:22px}
 }
+/* Sem destaque de fundo para o Hoje no Planner */
+#weeks.ptable .week.now{background:var(--bg)}
+#weeks.ptable .cell.nowc,.cell.nowc{background:none}
+@media (max-width:860px){#weeks.ptable .week.now{background:var(--surface)}}
 </style>
 </head>
 <body data-view="semanas">
@@ -762,6 +770,8 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <hr class="msep">
       <button id="reportBtn" class="plannerOnly">Relatório</button>
       <hr class="msep plannerOnly">
+      <button id="filtBtn" class="plannerOnly">Filtros</button>
+      <button id="distBtn">Distinção</button>
       <button id="hideDoneBtn" class="plannerOnly"></button>
       <button id="permBtn" class="plannerOnly"></button>
       <button id="wnoteBtn" class="plannerOnly"></button>
@@ -772,8 +782,6 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
         <select id="themeSel"><option value="auto">Automático</option><option value="light">Claro</option><option value="dark">Escuro</option></select></div>
       <div class="menurow" id="zoomRow"><label for="zoomSel">Tamanho</label>
         <select id="zoomSel"><option value="1">Pequeno</option><option value="1.15">Médio</option><option value="1.3">Grande</option><option value="1.45">Muito grande</option></select></div>
-      <button id="distBtn">Distinção</button>
-      <button id="filtBtn" class="plannerOnly">Filtros</button>
       <hr class="msep">
       <div class="menurow mrow-modes" id="modesRow"><span>Funções</span><span class="mchecks">
         <label><input type="checkbox" value="planner"> Planner</label>
@@ -954,8 +962,27 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
 <dialog id="cldlg">
   <div class="sheet">
     <div class="dhead"><h3>Agendas do Google</h3><button type="button" class="x" id="clClose" aria-label="Fechar">×</button></div>
-    <p class="lnote">Marque as agendas que aparecem no Formiga e escolha a cor de cada uma. “Padrão” volta à cor do Google.</p>
+    <p class="lnote">Marque as agendas que aparecem no Formiga e escolha a cor de cada uma, na mesma paleta das caixas. “Padrão” volta à cor do Google.</p>
     <div id="clList"></div>
+  </div>
+</dialog>
+<dialog id="gedlg">
+  <div class="sheet">
+    <div class="dhead">
+      <input id="geTitle" class="etitle" placeholder="Título" aria-label="Título do evento" enterkeyhint="done">
+      <button type="button" class="x" id="geClose" aria-label="Fechar">×</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="geAll"> Dia todo</label>
+    <div class="erow">
+      <label class="fld"><span>Início</span><input type="date" id="geSD"></label>
+      <label class="fld" id="geSTF"><span>Hora</span><input type="time" id="geST" step="300"></label>
+      <label class="fld"><span>Fim</span><input type="date" id="geED"></label>
+      <label class="fld" id="geETF"><span>Hora</span><input type="time" id="geET" step="300"></label>
+    </div>
+    <label class="fld"><span>Agenda</span><select id="geCal"></select></label>
+    <label class="fld"><span>Descrição</span><textarea id="geDesc" rows="3" style="border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;font:inherit;font-size:14px;color:var(--ink);resize:vertical"></textarea></label>
+    <p class="lnote" id="geNote"></p>
+    <div class="dfoot"><a class="btn" id="geLink" target="_blank" rel="noopener">Abrir no Google</a><span class="where"></span><button type="button" class="btn danger" id="geDel">Excluir</button><button type="button" class="btn" id="geSave">Salvar</button></div>
   </div>
 </dialog>
 <dialog id="gvdlg">
@@ -1804,7 +1831,7 @@ function fpopSync(){
       const tb=document.createElement("button");tb.type="button";tb.className="btn fpexit";
       tb.innerHTML='<span class="trico"></span> Transpor: '+(TR?"caixas nas linhas":"tempos nas linhas");
       tb.title="Trocar linhas e colunas";
-      tb.onclick=()=>{TR=!TR;hsx=0;try{localStorage.setItem("formiga-tr",TR?"1":"0");}catch(e){}render();};
+      tb.onclick=()=>{TR=!TR;hsx=0;focusOpen=false;try{localStorage.setItem("formiga-tr",TR?"1":"0");}catch(e){}render();};
       fpop.appendChild(tb);
     }
     fpop.dataset.stale="0";
@@ -1864,7 +1891,7 @@ function renderTable(){
   const areas=selAreas(),times=timeRows(),W=$("#weeks");
   $("#colhead").style.display="none";
   if(!times.length||!areas.length)return;
-  const tr=mob?!(SEL.areas&&SEL.areas.length===1&&!(SEL.blocks&&SEL.blocks.length===1)):TR;
+  const tr=mob?!(SEL.areas&&SEL.areas.length===1):TR;
   const rows=tr?areas:times,cols=tr?times:areas;
   const LAB=tr?boxLabW(areas,mob):timeLabW(rows,mob),scroll=!mob&&tr;
   W.classList.add("ptable");W.classList.toggle("scrollx",scroll);W.style.setProperty("--lab",LAB+"px");
@@ -2940,7 +2967,8 @@ function agendaEl(){
   nav.append(pv,lb,nx);bar.appendChild(nav);
   const add=document.createElement("button");add.type="button";add.className="btn";add.innerHTML='<span class="lg">+ Compromisso</span><span class="sm">+</span>';add.title="Novo compromisso";add.setAttribute("aria-label","Novo compromisso");add.id="agAdd";
   add.onclick=()=>{const t=new Date();newEvent(iso(t),Math.min(22*60,(t.getHours()+1)*60));};bar.appendChild(add);
-  if(calWanted()&&!calValid()&&gConfigured){const cb=document.createElement("button");cb.type="button";cb.className="btn";cb.textContent="Atualizar Google Agenda";cb.onclick=()=>calAsk(false);bar.insertBefore(cb,add);}
+  if(calWanted()&&calValid()){const gb=document.createElement("button");gb.type="button";gb.className="btn";gb.innerHTML='<span class="lg">+ Google</span><span class="sm">+G</span>';gb.title="Novo evento no Google Agenda";gb.setAttribute("aria-label","Novo evento no Google Agenda");gb.id="agAddG";gb.onclick=()=>openGEdit(null);bar.insertBefore(gb,add);}
+  if(calWanted()&&!calValid()&&gConfigured){const cb=document.createElement("button");cb.type="button";cb.className="btn";cb.textContent="Atualizar Google Agenda";cb.onclick=()=>calAsk(true);bar.insertBefore(cb,add);}
   box.appendChild(bar);
   const days=agDays();calTouch(days);lb.textContent=agLabel(days);
   if(getRange()==="m"){add.hidden=true;box.appendChild(monthEl(days));agSwipe(box);return box;}const evs=days.map(d=>eventsOn(d).concat(gEventsOn(d)));
@@ -3124,7 +3152,9 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")gPull();},60000);
 
 /* ---------- Google Agenda (somente leitura) ---------- */
-const GCAL_SCOPE="https://www.googleapis.com/auth/calendar.readonly";
+const GCAL_EDIT="https://www.googleapis.com/auth/calendar.events";
+const GCAL_SCOPE="https://www.googleapis.com/auth/calendar.readonly "+GCAL_EDIT;
+let calCanWrite=false;
 let calClient=null,calToken=null,calExp=0,calCache={},calKey="",calLoading=false;
 const calWanted=()=>{try{return localStorage.getItem("formiga-gcal")==="1";}catch(e){return false;}};
 const calValid=()=>!!calToken&&Date.now()<calExp;
@@ -3139,6 +3169,7 @@ function calAsk(interactive){if(!calClient){toast("Carregando o login do Google�
 function calOnToken(r){
   if(!r||r.error)return;
   calToken=r.access_token;calExp=Date.now()+((r.expires_in||3600)-60)*1000;
+  try{calCanWrite=google.accounts.oauth2.hasGrantedAllScopes(r,GCAL_EDIT);}catch(e){calCanWrite=String(r.scope||"").includes("calendar.events");}
   try{localStorage.setItem("formiga-gcal","1");}catch(e){}
   calCache={};calKey="";calUI();
   state.prefs=state.prefs||{};if(!state.prefs.showAgenda){state.prefs.showAgenda=true;save();}
@@ -3165,7 +3196,7 @@ async function calLoad(from,to,key){
   try{
     const cl=await calF("https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader&maxResults=50");
     const cals=(cl.items||[]).filter(c=>c.selected!==false&&!c.hidden);
-    calList=cals.map(c=>({id:c.id,name:c.summaryOverride||c.summary||c.id,color:c.backgroundColor||"#4a7a"}));
+    calList=cals.map(c=>({id:c.id,name:c.summaryOverride||c.summary||c.id,color:c.backgroundColor||"#4a7a",role:c.accessRole||"",primary:!!c.primary}));
     const shown=cals.filter(c=>!calHid.has(c.id));
     try{localStorage.setItem("formiga-callist",JSON.stringify(calList));}catch(e){}
     if(!calPal){try{const pc=await calF("https://www.googleapis.com/calendar/v3/colors");calPal=pc.event||{};}catch(e){calPal={};}}
@@ -3175,7 +3206,7 @@ async function calLoad(from,to,key){
       const ev=await calF(u);
       (ev.items||[]).forEach(e=>{
         if(e.status==="cancelled")return;
-        const base={google:true,title:e.summary||"(sem título)",hex:calColor(c,e),link:e.htmlLink,cal:c.summaryOverride||c.summary||""};
+        const base={google:true,title:e.summary||"(sem título)",hex:calColor(c,e),link:e.htmlLink,cal:c.summaryOverride||c.summary||"",gid:e.id,cid:c.id,etag:e.etag,rec:!!(e.recurringEventId||e.recurrence),guests:(e.attendees||[]).filter(a=>!a.self&&!a.resource).length,desc:e.description||"",role:c.accessRole||"",etype:e.eventType||"default",sRaw:(e.start&&(e.start.date||e.start.dateTime))||"",eRaw:(e.end&&(e.end.date||e.end.dateTime))||""};
         if(e.start&&e.start.date){
           let d=parseISO(e.start.date);const end=parseISO(e.end.date);
           while(d<end){const k=iso(d);(out[k]=out[k]||[]).push(Object.assign({allDay:true,start:"",end:""},base));d=addDays(d,1);}
@@ -3194,7 +3225,7 @@ let calList=[],calPal=null;try{calList=JSON.parse(localStorage.getItem("formiga-
 let calHid=new Set();try{calHid=new Set(JSON.parse(localStorage.getItem("formiga-calhide")||"[]"));}catch(e){}
 let calOv={};try{calOv=JSON.parse(localStorage.getItem("formiga-calcolors")||"{}")||{};}catch(e){}
 function calColor(c,e){
-  if(calOv[c.id])return calOv[c.id];
+  if(calOv[c.id])return PALETTE.includes(calOv[c.id])?colorVar(calOv[c.id]):calOv[c.id];
   if(e&&e.colorId&&calPal&&calPal[e.colorId])return calPal[e.colorId].background;
   return c.backgroundColor||"#4a7";
 }
@@ -3209,11 +3240,16 @@ function openCalColors(){
     const ck=document.createElement("input");ck.type="checkbox";ck.checked=!calHid.has(c.id);ck.setAttribute("aria-label","Mostrar "+c.name);
     ck.onchange=()=>{if(ck.checked)calHid.delete(c.id);else calHid.add(c.id);calHidSave();calKey="";calCache={};render();};
     const lb=document.createElement("label");lb.textContent=c.name;lb.style.flex="1";lb.style.opacity=calHid.has(c.id)?".5":"1";
-    const inp=document.createElement("input");inp.type="color";inp.value=/^#[0-9a-f]{6}$/i.test(calOv[c.id]||c.color)?(calOv[c.id]||c.color):"#4a7a4a";
-    inp.oninput=()=>{calOv[c.id]=inp.value;calOvSave();calKey="";render();};
-    const rs=document.createElement("button");rs.type="button";rs.className="btn ghost";rs.textContent="Padrão";
-    rs.onclick=()=>{delete calOv[c.id];calOvSave();inp.value=/^#[0-9a-f]{6}$/i.test(c.color)?c.color:"#4a7a4a";calKey="";render();};
-    row.append(ck,lb,inp,rs);box.appendChild(row);
+    const pal=document.createElement("div");pal.className="palette";pal.style.flexBasis="100%";
+    const dots=[];
+    const mark=()=>dots.forEach(d=>d.classList.toggle("on",calOv[c.id]===d.dataset.k));
+    PALETTE.forEach(k=>{const d=document.createElement("button");d.type="button";d.className="dot";d.dataset.k=k;d.style.setProperty("--tone",colorVar(k));d.setAttribute("aria-label","Cor "+k);
+      d.onclick=()=>{calOv[c.id]=k;calOvSave();mark();calKey="";render();};dots.push(d);pal.appendChild(d);});
+    const rs=document.createElement("button");rs.type="button";rs.className="btn";rs.textContent="Padrão";rs.title="Voltar à cor do Google";
+    rs.onclick=()=>{delete calOv[c.id];calOvSave();mark();calKey="";render();};
+    mark();
+    row.style.flexWrap="wrap";
+    row.append(ck,lb,rs,pal);box.appendChild(row);
   });
   cldlg.showModal();
 }
@@ -3231,10 +3267,113 @@ function allDayRow(days){
     row.appendChild(c);});
   return row;
 }
+
+/* ---------- Editar eventos do Google Agenda ---------- */
+const gedlg=$("#gedlg");let geCur=null,geDelArm=0,geBusy=false;
+const gWritable=c=>c&&(c.role==="owner"||c.role==="writer");
+function gReason(e){
+  if(!gWritable({role:e.role}))return "Esta agenda é somente leitura.";
+  if(e.rec)return "Evento que se repete: edite no Google Agenda.";
+  if(e.guests)return "Evento com convidados: edite no Google Agenda, para avisá-los.";
+  if(e.etype!=="default")return "Este tipo de evento só pode ser editado no Google Agenda.";
+  return "";
+}
+function gDT(raw){const d=new Date(raw);return {d:iso(d),t:fmtMin(d.getHours()*60+d.getMinutes())};}
+function openGEdit(e){
+  geCur=e||null;geDelArm=0;
+  const cals=calList.filter(gWritable);
+  const sel=$("#geCal");sel.innerHTML="";
+  cals.forEach(c=>{const o=document.createElement("option");o.value=c.id;o.textContent=c.name;sel.appendChild(o);});
+  let last="";try{last=localStorage.getItem("formiga-newcal")||"";}catch(x){}
+  if(e){
+    $("#geTitle").value=e.title==="(sem título)"?"":e.title;$("#geDesc").value=e.desc||"";
+    if(!cals.some(c=>c.id===e.cid)){const o=document.createElement("option");o.value=e.cid;o.textContent=e.cal||e.cid;sel.appendChild(o);}
+    sel.value=e.cid;
+    if(e.allDay){
+      $("#geAll").checked=true;$("#geSD").value=e.sRaw;$("#geED").value=iso(addDays(parseISO(e.eRaw),-1));
+      $("#geST").value="09:00";$("#geET").value="10:00";
+    }else{
+      $("#geAll").checked=false;const a=gDT(e.sRaw),b=gDT(e.eRaw);
+      $("#geSD").value=a.d;$("#geST").value=a.t;$("#geED").value=b.d;$("#geET").value=b.t;
+    }
+  }else{
+    const t=new Date(),m=Math.min(22*60,(t.getHours()+1)*60);
+    $("#geTitle").value="";$("#geDesc").value="";$("#geAll").checked=false;
+    $("#geSD").value=iso(t);$("#geED").value=iso(t);$("#geST").value=fmtMin(m);$("#geET").value=fmtMin(Math.min(m+60,23*60+55));
+    const pick=cals.find(c=>c.id===last)||cals.find(c=>c.primary)||cals[0];if(pick)sel.value=pick.id;
+  }
+  geAllUI();
+  $("#geDel").style.display=e?"":"none";$("#geDel").classList.remove("arm");$("#geDel").textContent="Excluir";
+  const a=$("#geLink");if(e&&e.link){a.href=e.link;a.hidden=false;}else a.hidden=true;
+  $("#geNote").textContent=!cals.length?"Nenhuma das suas agendas permite criar eventos.":(!calCanWrite?"Para salvar, o Formiga precisa da sua permissão para editar eventos. Ao salvar, o Google vai pedir.":"");
+  gedlg.showModal();if(!e)$("#geTitle").focus();
+}
+function geAllUI(){const all=$("#geAll").checked;$("#geSTF").style.display=all?"none":"";$("#geETF").style.display=all?"none":"";}
+$("#geAll").addEventListener("change",geAllUI);
+$("#geSD").addEventListener("change",()=>{if($("#geED").value<$("#geSD").value)$("#geED").value=$("#geSD").value;});
+$("#geTitle").addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();ev.target.blur();}});
+$("#geClose").onclick=()=>gedlg.close();
+gedlg.addEventListener("click",e=>{if(e.target===gedlg)gedlg.close();});
+async function gApi(method,url,body,etag){
+  const h={Authorization:"Bearer "+calToken};if(body)h["Content-Type"]="application/json";if(etag)h["If-Match"]=etag;
+  const r=await fetch(url,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  if(r.status===401){calToken=null;throw new Error("auth");}
+  if(r.status===403){calCanWrite=false;throw new Error("perm");}
+  if(r.status===412)throw new Error("conflict");
+  if(!r.ok)throw new Error("http "+r.status);
+  return r.status===204?null:r.json().catch(()=>null);
+}
+function gErr(x){
+  const m=String(x&&x.message||x);
+  if(m==="auth"||m==="perm"){toast("Autorize a edição no Google e tente de novo");calAsk(true);}
+  else if(m==="conflict"){toast("O evento mudou no Google. Recarregando…");gedlg.close();calKey="";calCache={};render();}
+  else if(m.startsWith("http 404")||m.startsWith("http 410")){toast("O evento não existe mais");gedlg.close();calKey="";calCache={};render();}
+  else toast("Não foi possível salvar ("+m+")");
+}
+function gDone(msg){gedlg.close();calKey="";calCache={};toast(msg);render();}
+const GBASE="https://www.googleapis.com/calendar/v3/calendars/";
+$("#geSave").onclick=async()=>{
+  if(geBusy)return;
+  const all=$("#geAll").checked,sd=$("#geSD").value,ed=$("#geED").value||sd,st=$("#geST").value,et=$("#geET").value,cid=$("#geCal").value;
+  if(!sd||!cid){toast("Escolha a data e a agenda");return;}
+  let start,end;const TZ=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if(all){if(ed<sd){toast("O fim é antes do início");return;}start={date:sd,dateTime:null,timeZone:null};end={date:iso(addDays(parseISO(ed),1)),dateTime:null,timeZone:null};}
+  else{
+    if(!st||!et){toast("Informe as horas");return;}
+    const a=new Date(sd+"T"+st),b=new Date(ed+"T"+et);if(!(b>a)){toast("O fim precisa ser depois do início");return;}
+    start={dateTime:a.toISOString(),timeZone:TZ,date:null};end={dateTime:b.toISOString(),timeZone:TZ,date:null};
+  }
+  if(!calCanWrite||!calValid()){calAsk(true);toast("Autorize a edição no Google e toque em Salvar de novo");return;}
+  const body={summary:$("#geTitle").value.trim()||"(sem título)",description:$("#geDesc").value,start,end};
+  geBusy=true;$("#geSave").textContent="Salvando…";
+  try{
+    if(geCur){
+      const e=geCur;
+      await gApi("PATCH",GBASE+encodeURIComponent(e.cid)+"/events/"+encodeURIComponent(e.gid)+"?sendUpdates=none",body,e.etag);
+      if(cid!==e.cid)await gApi("POST",GBASE+encodeURIComponent(e.cid)+"/events/"+encodeURIComponent(e.gid)+"/move?destination="+encodeURIComponent(cid)+"&sendUpdates=none");
+    }else{
+      if(all){delete start.dateTime;delete start.timeZone;delete end.dateTime;delete end.timeZone;}else{delete start.date;delete end.date;}
+      await gApi("POST",GBASE+encodeURIComponent(cid)+"/events",body);
+      try{localStorage.setItem("formiga-newcal",cid);}catch(x){}
+    }
+    gDone("Salvo no Google Agenda");
+  }catch(x){gErr(x);}
+  finally{geBusy=false;$("#geSave").textContent="Salvar";}
+};
+$("#geDel").onclick=async()=>{
+  const e=geCur;if(!e||geBusy)return;
+  if(Date.now()-geDelArm>4000){geDelArm=Date.now();$("#geDel").classList.add("arm");$("#geDel").textContent="Toque de novo para excluir";setTimeout(()=>{if(Date.now()-geDelArm>=3900){$("#geDel").classList.remove("arm");$("#geDel").textContent="Excluir";}},4000);return;}
+  if(!calCanWrite||!calValid()){calAsk(true);toast("Autorize a edição no Google e tente de novo");return;}
+  geBusy=true;
+  try{await gApi("DELETE",GBASE+encodeURIComponent(e.cid)+"/events/"+encodeURIComponent(e.gid)+"?sendUpdates=none");gDone("Evento excluído do Google Agenda");}
+  catch(x){gErr(x);}
+  finally{geBusy=false;}
+};
 const gvdlg=$("#gvdlg");
 function openGEvent(e){
+  if(!gReason(e)&&e.gid){openGEdit(e);return;}
   $("#gvTitle").textContent=e.title;
-  $("#gvInfo").textContent=(e.allDay?"Dia todo":e.start+"–"+e.end)+(e.cal?", "+e.cal:"")+". Este compromisso vem do Google Agenda.";
+  $("#gvInfo").textContent=(e.allDay?"Dia todo":e.start+"–"+e.end)+(e.cal?", "+e.cal:"")+". Este compromisso vem do Google Agenda."+(gReason(e)?" "+gReason(e):"");
   const a=$("#gvLink");if(e.link){a.href=e.link;a.hidden=false;}else a.hidden=true;
   gvdlg.showModal();
 }
@@ -3405,16 +3544,16 @@ ddlg.addEventListener("close",()=>render());
 /* ---------- Deslizar para o lado: próximo tempo ou próxima caixa ---------- */
 (function(){
   let x0=0,y0=0,t0=0,ok=false;
-  const area=$("#weeks");
+  const area=document;
   function nav(dir){
     const oneA=SEL.areas&&SEL.areas.length===1,oneB=SEL.blocks&&SEL.blocks.length===1;
     if(oneA){const ids=state.cols.map(c=>c.id),i=ids.indexOf(SEL.areas[0]),n=i+dir;if(i<0||n<0||n>=ids.length)return;SEL.areas=[ids[n]];selSave();render();return;}
     if(oneB){const bo=blockOrder(),i=bo.indexOf(SEL.blocks[0]),n=i+dir;if(i<0||n<0||n>=bo.length)return;SEL.blocks=[bo[n]];selSave();render();}
   }
-  function hscroll(el){for(;el&&el!==area;el=el.parentElement){if(el.scrollWidth>el.clientWidth+4&&/(auto|scroll)/.test(getComputedStyle(el).overflowX))return true;}return false;}
+  function hscroll(el){for(;el&&el!==document.body&&el!==document.documentElement;el=el.parentElement){if(el.scrollWidth>el.clientWidth+4&&/(auto|scroll)/.test(getComputedStyle(el).overflowX))return true;}return false;}
   area.addEventListener("touchstart",e=>{
-    ok=false;if(e.touches.length!==1||mode!=="planner"||(document.body.dataset.view||"semanas")!=="semanas")return;
-    const t=e.target;if(t.closest&&t.closest("input,textarea,select,dialog,.addform"))return;if(hscroll(t))return;
+    ok=false;if(e.touches.length!==1||mode!=="planner"||closedMode===mode||(document.body.dataset.view||"semanas")!=="semanas")return;
+    const t=e.target;if(t.closest&&t.closest("input,textarea,select,dialog,.addform,.top,#fpop,.menu-pop"))return;if(hscroll(t))return;
     x0=e.touches[0].clientX;y0=e.touches[0].clientY;t0=Date.now();ok=true;
   },{passive:true});
   area.addEventListener("touchend",e=>{
