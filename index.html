@@ -3211,7 +3211,7 @@ function drawEvent(){
   $("#eWhere").textContent=$("#eRep").checked?([0,6].includes(+$("#eDay").value)?"Todo ":"Toda ")+$("#eDay").selectedOptions[0].textContent:"";
 }
 $("#eTitle").addEventListener("input",ev=>{const e=evById(curEv);if(e){e.title=ev.target.value;save();}});
-$("#eTitle").addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();ev.target.blur();}});
+$("#eTitle").addEventListener("keydown",ev=>{if(ev.key==="Enter"&&!ev.isComposing){ev.preventDefault();$("#eSave").click();}});
 $("#eRep").addEventListener("change",ev=>{
   const e=evById(curEv);if(!e)return;
   if(ev.target.checked){e.day=parseISO(e.date||iso(new Date())).getDay();e.date=null;}
@@ -3541,7 +3541,7 @@ $("#geAll").addEventListener("change",geAllUI);
 let geSDprev="";$("#geSD").addEventListener("focus",()=>{geSDprev=$("#geSD").value;});
 $("#geSD").addEventListener("change",()=>{const ed=$("#geED");if(!ed.value||ed.value===geSDprev||ed.value<$("#geSD").value)ed.value=$("#geSD").value;geSDprev=$("#geSD").value;geAllUI();});
 $("#geED").addEventListener("change",geAllUI);
-$("#geTitle").addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();ev.target.blur();}});
+$("#geTitle").addEventListener("keydown",ev=>{if(ev.key==="Enter"&&!ev.isComposing){ev.preventDefault();$("#geSave").click();}});
 $("#geClose").onclick=()=>gedlg.close();
 gedlg.addEventListener("click",e=>{if(e.target===gedlg)gedlg.close();});
 async function gApi(method,url,body,etag){

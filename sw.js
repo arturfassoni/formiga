@@ -1,5 +1,5 @@
 // Formiga: funciona offline. Ao publicar uma versão nova, troque o número abaixo.
-const CACHE = "formiga-v32";
+const CACHE = "formiga-v33";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
