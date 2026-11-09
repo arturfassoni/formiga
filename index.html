@@ -438,8 +438,8 @@ a.btn{color:var(--ink);text-decoration:none}
   .agnav .ib{width:20px}
   #agAdd{padding:3px 9px!important;font-size:15px!important;font-weight:600}
 }
-#agAddG .sm{display:none}
-@media (max-width:860px){#agAdd .lg,#agAddG .lg{display:none}#agAdd .sm,#agAddG .sm{display:inline}#agAdd{padding:4px 10px;font-size:12.5px}.agenda{--hp:30px;padding:8px 6px 10px}.aghead,.agbody{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.ev{font-size:10.5px;padding:2px 3px}}
+.agrefresh{padding:5px 8px;display:inline-flex;align-items:center}
+@media (max-width:860px){#agAdd .lg{display:none}#agAdd .sm{display:inline}#agAdd{padding:4px 10px;font-size:12.5px}.agenda{--hp:30px;padding:8px 6px 10px}.aghead,.agbody{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.ev{font-size:10.5px;padding:2px 3px}}
 .brand.abrand{margin:2px 0 0;justify-content:center}
 .brand.abrand svg{width:76px;height:76px}
 .help .lead{font-size:15px;text-align:center;color:var(--ink);padding:0 6px 4px}
@@ -582,6 +582,8 @@ body[data-view="feitos"][data-mode="planner"] #colhead{display:none}
 .ab.delb:hover{color:var(--c-red)}
 .nfoot{margin-top:4px}
 #listsBtn,#catsBtn{display:none!important}
+#weeks.ptable .week.now .cell + .cell{border-left-color:var(--line)}
+@media (min-width:861px){#weeks.ptable .wlabel + .cell{border-left:1px solid var(--line)}}
 body.closed .wrap,body.closed .pager,body.closed .fab,body.closed #goNow,body.closed #agBtn,body.closed #listsBtn,body.closed #catsBtn,body.closed #todayInfo{display:none!important}
 .focusbtn{border:0;background:none;padding:2px;margin-left:-2px;margin-right:auto;color:var(--muted);display:inline-flex;align-items:center;cursor:pointer;border-radius:6px}
 .focusbtn:hover,.focusbtn.on{color:var(--ink)}
@@ -972,15 +974,16 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <input id="geTitle" class="etitle" placeholder="Título" aria-label="Título do evento" enterkeyhint="done">
       <button type="button" class="x" id="geClose" aria-label="Fechar">×</button>
     </div>
-    <label class="chk"><input type="checkbox" id="geAll"> Dia todo</label>
+    <label class="chk" id="geAllF"><input type="checkbox" id="geAll"> Dia todo</label>
+    <label class="chk" id="geRepF"><input type="checkbox" id="geRep"> Repete toda semana (fica só no Formiga)</label>
     <div class="erow">
       <label class="fld"><span>Início</span><input type="date" id="geSD"></label>
       <label class="fld" id="geSTF"><span>Hora</span><input type="time" id="geST" step="300"></label>
-      <label class="fld"><span>Fim</span><input type="date" id="geED"></label>
+      <label class="fld" id="geEDF"><span>Fim</span><input type="date" id="geED"></label>
       <label class="fld" id="geETF"><span>Hora</span><input type="time" id="geET" step="300"></label>
     </div>
     <label class="fld"><span>Agenda</span><select id="geCal"></select></label>
-    <label class="fld"><span>Descrição</span><textarea id="geDesc" rows="3" style="border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;font:inherit;font-size:14px;color:var(--ink);resize:vertical"></textarea></label>
+    <label class="fld" id="geDescF"><span>Descrição</span><textarea id="geDesc" rows="3" style="border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;font:inherit;font-size:14px;color:var(--ink);resize:vertical"></textarea></label>
     <p class="lnote" id="geNote"></p>
     <div class="dfoot"><a class="btn" id="geLink" target="_blank" rel="noopener">Abrir no Google</a><span class="where"></span><button type="button" class="btn danger" id="geDel">Excluir</button><button type="button" class="btn" id="geSave">Salvar</button></div>
   </div>
@@ -2966,9 +2969,13 @@ function agendaEl(){
   const nx=document.createElement("button");nx.type="button";nx.className="ib";nx.textContent="›";nx.setAttribute("aria-label","Próximo");nx.onclick=()=>agShift(1);
   nav.append(pv,lb,nx);bar.appendChild(nav);
   const add=document.createElement("button");add.type="button";add.className="btn";add.innerHTML='<span class="lg">+ Compromisso</span><span class="sm">+</span>';add.title="Novo compromisso";add.setAttribute("aria-label","Novo compromisso");add.id="agAdd";
-  add.onclick=()=>{const t=new Date();newEvent(iso(t),Math.min(22*60,(t.getHours()+1)*60));};bar.appendChild(add);
-  if(calWanted()&&calValid()){const gb=document.createElement("button");gb.type="button";gb.className="btn";gb.innerHTML='<span class="lg">+ Google</span><span class="sm">+G</span>';gb.title="Novo evento no Google Agenda";gb.setAttribute("aria-label","Novo evento no Google Agenda");gb.id="agAddG";gb.onclick=()=>openGEdit(null);bar.insertBefore(gb,add);}
-  if(calWanted()&&!calValid()&&gConfigured){const cb=document.createElement("button");cb.type="button";cb.className="btn";cb.textContent="Atualizar Google Agenda";cb.onclick=()=>calAsk(true);bar.insertBefore(cb,add);}
+  add.onclick=()=>{const t=new Date();newAny(iso(t),Math.min(22*60,(t.getHours()+1)*60));};bar.appendChild(add);
+  if(calWanted()&&gConfigured){
+    const rb=document.createElement("button");rb.type="button";rb.className="btn agrefresh";rb.title="Atualizar Google Agenda";rb.setAttribute("aria-label","Atualizar Google Agenda");
+    rb.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.5-3.55"/><path d="M13 2.5v3h-3"/></svg>';
+    rb.onclick=()=>{if(calValid()){calKey="";calCache={};toast("Atualizando…");render();}else calAsk(true);};
+    bar.insertBefore(rb,add);
+  }
   box.appendChild(bar);
   const days=agDays();calTouch(days);lb.textContent=agLabel(days);
   if(getRange()==="m"){add.hidden=true;box.appendChild(monthEl(days));agSwipe(box);return box;}const evs=days.map(d=>eventsOn(d).concat(gEventsOn(d)));
@@ -2986,7 +2993,7 @@ function agendaEl(){
   days.forEach((d,di)=>{
     const col=document.createElement("div");col.className="agcol"+(iso(d)===today?" today":"");col.style.height=(H*hp)+"px";
     
-    col.addEventListener("click",e=>{if(e.target!==col)return;const y=e.offsetY;const m=lo+Math.floor(y/hp*2)*30;newEvent(iso(d),m);});
+    col.addEventListener("click",e=>{if(e.target!==col)return;const y=e.offsetY;const m=lo+Math.floor(y/hp*2)*30;newAny(iso(d),m);});
     const list=evs[di].slice().sort((a,b)=>toMin(a.start)-toMin(b.start));
     const lanes=[],laneOf=new Map();list.forEach(e=>{let i=lanes.findIndex(end=>end<=toMin(e.start));if(i<0){i=lanes.length;lanes.push(0);}lanes[i]=toMin(e.end);laneOf.set(e,i);});
     list.forEach(e=>{
@@ -3004,6 +3011,10 @@ function agendaEl(){
   box.append(head);const adr=allDayRow(days);if(adr)box.appendChild(adr);box.append(body);
   agSwipe(box);
   return box;
+}
+function newAny(date,startMin){
+  if(calWanted()&&calList.some(c=>c.role==="owner"||c.role==="writer"))openGEdit(null,{d:date,m:startMin});
+  else newEvent(date,startMin);
 }
 const edlg=$("#edlg");let curEv=null;
 const evById=id=>(state.events||[]).find(e=>e.id===id);
@@ -3063,24 +3074,54 @@ const gConfigured=!GOOGLE_CLIENT_ID.startsWith("COLE_AQUI");
 let gToken=null,gExp=0,gFileId=null,gClient=null,gPushT=null,gBarClosed=false;
 const gWanted=()=>{try{return localStorage.getItem("formiga-google")==="1";}catch(e){return false;}};
 const gValid=()=>!!gToken&&Date.now()<gExp;
-function gInit(){
-  gUI();if(!gConfigured)return;
-  if(!(window.google&&google.accounts&&google.accounts.oauth2)){setTimeout(gInit,300);return;}
-  gClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:G_SCOPE,callback:gOnToken,error_callback:()=>gUI()});
-  if(gWanted()){try{gClient.requestAccessToken({prompt:""});}catch(e){}}
-  gUI();
+const GCAL_READ="https://www.googleapis.com/auth/calendar.readonly";
+let authClient=null,authSig="",pendDrive=false,pendCal=false,lastSilent=0;
+const hasSc=(scope,need)=>need.split(" ").every(x=>String(scope||"").split(" ").includes(x));
+function authScopes(){const a=[];if(gWanted()||pendDrive)a.push(G_SCOPE);if(calWanted()||pendCal)a.push(GCAL_SCOPE);return a.join(" ");}
+function authAsk(opts){
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){toast("Carregando o login do Google… tente de novo em instantes");return;}
+  const sc=authScopes();if(!sc)return;
+  if(!authClient||authSig!==sc){
+    authSig=sc;const cfg={client_id:GOOGLE_CLIENT_ID,scope:sc,include_granted_scopes:true,callback:authOnToken,error_callback:()=>{pendDrive=false;pendCal=false;gUI();calUI();}};
+    let h="";try{h=localStorage.getItem("formiga-hint")||"";}catch(e){}if(h)cfg.hint=h;
+    authClient=google.accounts.oauth2.initTokenClient(cfg);
+  }
+  try{authClient.requestAccessToken(opts||{});}catch(e){}
 }
-function gSignIn(){if(gClient)gClient.requestAccessToken();else toast("Carregando o login do Google… tente de novo em instantes");}
-function gOnToken(r){
-  if(!r||r.error){gUI();return;}
-  gToken=r.access_token;gExp=Date.now()+((r.expires_in||3600)-60)*1000;
-  try{localStorage.setItem("formiga-google","1");}catch(e){}
-  gUI();gSync();
+function authOnToken(r){
+  if(!r||r.error){pendDrive=false;pendCal=false;gUI();return;}
+  const exp=Date.now()+((r.expires_in||3600)-60)*1000;
+  try{localStorage.setItem("formiga-tok",JSON.stringify({t:r.access_token,exp,scope:r.scope||""}));}catch(e){}
+  authApply(r.access_token,exp,r.scope||"");
 }
+function authApply(tok,exp,scope){
+  if(hasSc(scope,G_SCOPE)&&(gWanted()||pendDrive)){
+    gToken=tok;gExp=exp;pendDrive=false;
+    try{localStorage.setItem("formiga-google","1");}catch(e){}
+    gUI();gSync();
+  }
+  if(hasSc(scope,GCAL_READ)&&(calWanted()||pendCal)){
+    calToken=tok;calExp=exp;pendCal=false;calCanWrite=hasSc(scope,GCAL_EDIT);
+    try{localStorage.setItem("formiga-gcal","1");}catch(e){}
+    calCache={};calKey="";calUI();
+    state.prefs=state.prefs||{};if(!state.prefs.showAgenda){state.prefs.showAgenda=true;save();}
+    render();
+  }
+}
+function authInit(){
+  gUI();calUI();
+  if(!gConfigured||!(gWanted()||calWanted()))return;
+  let c=null;try{c=JSON.parse(localStorage.getItem("formiga-tok")||"null");}catch(e){}
+  if(c&&c.t&&c.exp>Date.now()+120000&&hasSc(c.scope,authScopes())){authApply(c.t,c.exp,c.scope);return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){setTimeout(authInit,300);return;}
+  authAsk({prompt:""});
+}
+function gInit(){authInit();}
+function gSignIn(){pendDrive=true;authAsk({});}
 async function gf(url,opts){
   opts=opts||{};opts.headers=Object.assign({},opts.headers,{Authorization:"Bearer "+gToken});
   const r=await fetch(url,opts);
-  if(r.status===401){gToken=null;gUI();throw new Error("auth");}
+  if(r.status===401){gToken=null;try{localStorage.removeItem("formiga-tok");}catch(e){}gUI();throw new Error("auth");}
   if(!r.ok)throw new Error("http "+r.status);
   return r;
 }
@@ -3143,12 +3184,15 @@ $("#gbarBtn").onclick=gSignIn;
 $("#gbarX").onclick=()=>{gBarClosed=true;gUI();};
 $("#gMenu").onclick=()=>{
   if(gWanted()){
-    try{if(gToken&&google.accounts.oauth2.revoke)google.accounts.oauth2.revoke(gToken);}catch(e){}
     gToken=null;gFileId=null;try{localStorage.setItem("formiga-google","0");}catch(e){}
     setStatus("Salvo neste aparelho");toast("Desconectado do Google Drive");gBarClosed=false;gUI();
   }else gSignIn();
 };
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")gPull();});
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible")return;
+  gPull();
+  if(gConfigured&&((gWanted()&&!gValid())||(calWanted()&&!calValid()))&&Date.now()-lastSilent>300000){lastSilent=Date.now();authAsk({prompt:""});}
+});
 setInterval(()=>{if(document.visibilityState==="visible")gPull();},60000);
 
 /* ---------- Google Agenda (somente leitura) ---------- */
@@ -3158,23 +3202,8 @@ let calCanWrite=false;
 let calClient=null,calToken=null,calExp=0,calCache={},calKey="",calLoading=false;
 const calWanted=()=>{try{return localStorage.getItem("formiga-gcal")==="1";}catch(e){return false;}};
 const calValid=()=>!!calToken&&Date.now()<calExp;
-function calInit(){
-  if(!gConfigured)return;
-  if(!(window.google&&google.accounts&&google.accounts.oauth2)){setTimeout(calInit,400);return;}
-  calClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:GCAL_SCOPE,include_granted_scopes:true,callback:calOnToken,error_callback:()=>{}});
-  if(calWanted()){try{calClient.requestAccessToken({prompt:""});}catch(e){}}
-  calUI();
-}
-function calAsk(interactive){if(!calClient){toast("Carregando o login do Google…");return;}calClient.requestAccessToken(interactive?{}:{prompt:""});}
-function calOnToken(r){
-  if(!r||r.error)return;
-  calToken=r.access_token;calExp=Date.now()+((r.expires_in||3600)-60)*1000;
-  try{calCanWrite=google.accounts.oauth2.hasGrantedAllScopes(r,GCAL_EDIT);}catch(e){calCanWrite=String(r.scope||"").includes("calendar.events");}
-  try{localStorage.setItem("formiga-gcal","1");}catch(e){}
-  calCache={};calKey="";calUI();
-  state.prefs=state.prefs||{};if(!state.prefs.showAgenda){state.prefs.showAgenda=true;save();}
-  render();
-}
+function calInit(){}
+function calAsk(interactive){if(interactive)pendCal=true;authAsk(interactive?{}:{prompt:""});}
 function calUI(){const m=$("#calMenu");if(!gConfigured){m.hidden=true;return;}m.hidden=false;m.textContent=calWanted()?"Ocultar Google Agenda":"Mostrar Google Agenda";$("#calColorsBtn").hidden=!calWanted();}
 $("#calMenu").onclick=()=>{
   if(calWanted()){try{localStorage.setItem("formiga-gcal","0");}catch(e){}calToken=null;calCache={};calKey="";calUI();render();toast("Google Agenda oculto");}
@@ -3196,6 +3225,7 @@ async function calLoad(from,to,key){
   try{
     const cl=await calF("https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader&maxResults=50");
     const cals=(cl.items||[]).filter(c=>c.selected!==false&&!c.hidden);
+    const pr=(cl.items||[]).find(c=>c.primary);if(pr&&String(pr.id).includes("@")){try{localStorage.setItem("formiga-hint",pr.id);}catch(e){}}
     calList=cals.map(c=>({id:c.id,name:c.summaryOverride||c.summary||c.id,color:c.backgroundColor||"#4a7a",role:c.accessRole||"",primary:!!c.primary}));
     const shown=cals.filter(c=>!calHid.has(c.id));
     try{localStorage.setItem("formiga-callist",JSON.stringify(calList));}catch(e){}
@@ -3279,7 +3309,7 @@ function gReason(e){
   return "";
 }
 function gDT(raw){const d=new Date(raw);return {d:iso(d),t:fmtMin(d.getHours()*60+d.getMinutes())};}
-function openGEdit(e){
+function openGEdit(e,pre){
   geCur=e||null;geDelArm=0;
   const cals=calList.filter(gWritable);
   const sel=$("#geCal");sel.innerHTML="";
@@ -3297,18 +3327,29 @@ function openGEdit(e){
       $("#geSD").value=a.d;$("#geST").value=a.t;$("#geED").value=b.d;$("#geET").value=b.t;
     }
   }else{
-    const t=new Date(),m=Math.min(22*60,(t.getHours()+1)*60);
-    $("#geTitle").value="";$("#geDesc").value="";$("#geAll").checked=false;
-    $("#geSD").value=iso(t);$("#geED").value=iso(t);$("#geST").value=fmtMin(m);$("#geET").value=fmtMin(Math.min(m+60,23*60+55));
-    const pick=cals.find(c=>c.id===last)||cals.find(c=>c.primary)||cals[0];if(pick)sel.value=pick.id;
+    const t=new Date(),m=pre&&pre.m!=null?pre.m:Math.min(22*60,(t.getHours()+1)*60),d0=pre&&pre.d?pre.d:iso(t);
+    $("#geTitle").value="";$("#geDesc").value="";$("#geAll").checked=false;$("#geRep").checked=false;
+    $("#geSD").value=d0;$("#geED").value=d0;$("#geST").value=fmtMin(m);$("#geET").value=fmtMin(Math.min(m+60,23*60+55));
+    const fo=document.createElement("option");fo.value="__f";fo.textContent="Formiga (só neste app)";sel.appendChild(fo);
+    const pick=cals.find(c=>c.primary)||cals[0];sel.value=pick?pick.id:"__f";
   }
+  $("#geRepF").style.display=e?"none":"";$("#geCal").disabled=false;
   geAllUI();
   $("#geDel").style.display=e?"":"none";$("#geDel").classList.remove("arm");$("#geDel").textContent="Excluir";
   const a=$("#geLink");if(e&&e.link){a.href=e.link;a.hidden=false;}else a.hidden=true;
-  $("#geNote").textContent=!cals.length?"Nenhuma das suas agendas permite criar eventos.":(!calCanWrite?"Para salvar, o Formiga precisa da sua permissão para editar eventos. Ao salvar, o Google vai pedir.":"");
+  $("#geNote").dataset.fixed="";geAllUI();
   gedlg.showModal();if(!e)$("#geTitle").focus();
 }
-function geAllUI(){const all=$("#geAll").checked;$("#geSTF").style.display=all?"none":"";$("#geETF").style.display=all?"none":"";}
+function geFm(){return $("#geCal").value==="__f";}
+function geAllUI(){
+  const fm=geFm(),all=$("#geAll").checked&&!fm;
+  $("#geAllF").style.display=fm?"none":"";$("#geEDF").style.display=fm?"none":"";$("#geDescF").style.display=fm?"none":"";
+  $("#geSTF").style.display=all?"none":"";$("#geETF").style.display=all?"none":"";
+  if(!$("#geNote").dataset.fixed)$("#geNote").textContent=fm?($("#geRep").checked?"Vai se repetir toda semana, no mesmo dia da semana.":"Este compromisso fica só no Formiga, não vai para o Google Agenda."):(calCanWrite?"":"Para salvar, o Formiga precisa da sua permissão para editar eventos. Ao salvar, o Google vai pedir.");
+}
+let gePrevCal="";
+$("#geRep").addEventListener("change",()=>{const sel=$("#geCal");if($("#geRep").checked){gePrevCal=sel.value;sel.value="__f";sel.disabled=true;}else{sel.disabled=false;if(gePrevCal)sel.value=gePrevCal;}geAllUI();});
+$("#geCal").addEventListener("change",geAllUI);
 $("#geAll").addEventListener("change",geAllUI);
 $("#geSD").addEventListener("change",()=>{if($("#geED").value<$("#geSD").value)$("#geED").value=$("#geSD").value;});
 $("#geTitle").addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();ev.target.blur();}});
@@ -3336,6 +3377,12 @@ $("#geSave").onclick=async()=>{
   if(geBusy)return;
   const all=$("#geAll").checked,sd=$("#geSD").value,ed=$("#geED").value||sd,st=$("#geST").value,et=$("#geET").value,cid=$("#geCal").value;
   if(!sd||!cid){toast("Escolha a data e a agenda");return;}
+  if(cid==="__f"&&!geCur){
+    if(!st||!et||toMin(et)<=toMin(st)){toast("O fim precisa ser depois do início");return;}
+    state.events=state.events||[];const used=new Set(state.events.map(x=>x.color)),rep=$("#geRep").checked;
+    state.events.push({id:uid(),title:$("#geTitle").value.trim()||"Compromisso",day:rep?parseISO(sd).getDay():null,date:rep?null:sd,start:st,end:et,color:PALETTE.find(k=>!used.has(k))||"blue"});
+    save();gedlg.close();render();toast("Compromisso criado no Formiga");return;
+  }
   let start,end;const TZ=Intl.DateTimeFormat().resolvedOptions().timeZone;
   if(all){if(ed<sd){toast("O fim é antes do início");return;}start={date:sd,dateTime:null,timeZone:null};end={date:iso(addDays(parseISO(ed),1)),dateTime:null,timeZone:null};}
   else{
