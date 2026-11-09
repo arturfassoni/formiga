@@ -414,6 +414,9 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .agh b{display:inline-block;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
 .agh.today b{color:var(--surface);background:var(--ink);border-radius:999px;display:inline-block;padding:1px 7px}
 .agtimes{position:relative}
+.aghandle{height:16px;margin:4px 0 -6px;display:flex;align-items:center;justify-content:center;cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none}
+.aghandle i{display:block;width:44px;height:4px;border-radius:3px;background:var(--line)}
+.aghandle:hover i{background:var(--muted)}
 .agt{position:absolute;right:6px;font-size:10.5px;color:var(--muted);transform:translateY(-6px);font-variant-numeric:tabular-nums}
 .agcol{position:relative;border-left:1px solid var(--line);cursor:default;background-image:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent var(--hp))}
 .agcol.today{background-color:transparent}
@@ -1306,7 +1309,7 @@ let layoutPref=layoutDefault;
 let mode="planner";try{mode=localStorage.getItem("formiga-mode")||"planner";}catch(e){}
 document.body.dataset.mode=mode;
 const viewKey=()=>mode!=="planner"?mode:(document.body.dataset.view||"semanas");
-const isSwipe=()=>(mq.matches||mode==="notas")&&mode!=="planner";
+const isSwipe=()=>mode!=="planner";
 let laneIdx=0;
 const ICON_STACK='<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2.5" width="12" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="10.5" width="12" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
 const ICON_SIDE='<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="3" width="6" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="3" width="6" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
@@ -2964,6 +2967,14 @@ function monthEl(days){
   w.append(hd,g);return w;
 }
 function eventsOn(d){const k=iso(d),w=d.getDay();return (state.events||[]).filter(e=>e.date?e.date===k:e.day===w);}
+function agHpGet(){try{return parseFloat(localStorage.getItem("formiga-aghp"))||0;}catch(e){return 0;}}
+function agHpSet(v){try{if(v)localStorage.setItem("formiga-aghp",String(v));else localStorage.removeItem("formiga-aghp");}catch(e){}}
+function agApplyHp(box,hp,lo,H){
+  box.style.setProperty("--hp",hp+"px");
+  $$(".agcol",box).forEach(c=>{c.style.height=(H*hp)+"px";});
+  const tl=$(".agtimes",box);if(tl){tl.style.height=(H*hp)+"px";$$(".agt",tl).forEach(t=>{t.style.top=(t.dataset.i*hp)+"px";});}
+  $$(".agcol .ev[data-s]",box).forEach(b=>{const s=+b.dataset.s,en=+b.dataset.e;b.style.top=((s-lo)/60*hp+1)+"px";b.style.height=Math.max(16,(en-s)/60*hp-2)+"px";});
+}
 function agendaEl(){
   const box=document.createElement("div");box.className="agenda";
   const bar=document.createElement("div");bar.className="agbar";
@@ -2990,14 +3001,14 @@ function agendaEl(){
   if(getRange()==="m"){add.hidden=true;box.appendChild(monthEl(days));agSwipe(box);return box;}const evs=days.map(d=>eventsOn(d).concat(gEventsOn(d)));
   let lo=8*60,hi=18*60;
   evs.flat().forEach(e=>{lo=Math.min(lo,Math.floor(toMin(e.start)/60)*60);hi=Math.max(hi,Math.ceil(toMin(e.end)/60)*60);});
-  const hp=mq.matches?30:34,H=(hi-lo)/60;
-  box.style.setProperty("--n",days.length);
+  const hpDef=mq.matches?30:34,hp=agHpGet()||hpDef,H=(hi-lo)/60;
+  box.style.setProperty("--n",days.length);box.style.setProperty("--hp",hp+"px");
   const head=document.createElement("div");head.className="aghead";head.appendChild(document.createElement("div"));
   const today=iso(new Date());
   days.forEach(d=>{const x=document.createElement("div");x.className="agh"+(iso(d)===today?" today":"");x.innerHTML="<span></span><b></b>";x.firstChild.textContent=DIAS[d.getDay()];x.lastChild.textContent=d.getDate();head.appendChild(x);});
   const body=document.createElement("div");body.className="agbody";
   const tl=document.createElement("div");tl.className="agtimes";tl.style.height=(H*hp)+"px";
-  for(let i=1;i<H;i++){const t=document.createElement("span");t.className="agt";t.style.top=(i*hp)+"px";t.textContent=fmtMin(lo+i*60).replace(":00","h");tl.appendChild(t);}
+  for(let i=1;i<H;i++){const t=document.createElement("span");t.className="agt";t.dataset.i=i;t.style.top=(i*hp)+"px";t.textContent=fmtMin(lo+i*60).replace(":00","h");tl.appendChild(t);}
   body.appendChild(tl);
   const cols=[];
   days.forEach((d,di)=>{
@@ -3012,7 +3023,7 @@ function agendaEl(){
       const over=list.filter(o=>toMin(o.start)<en&&Math.max(toMin(o.end),toMin(o.start)+15)>s);
       const n=Math.max(...over.map(o=>laneOf.get(o)))+1;
       const b=document.createElement("button");b.type="button";b.className="ev";b.style.setProperty("--tone",e.hex||colorVar(e.color));
-      b.style.top=((s-lo)/60*hp+1)+"px";b.style.height=Math.max(16,(en-s)/60*hp-2)+"px";
+      b.dataset.s=s;b.dataset.e=en;b.style.top=((s-lo)/60*hp+1)+"px";b.style.height=Math.max(16,(en-s)/60*hp-2)+"px";
       b.style.left="calc("+(laneOf.get(e)/n*100)+"% + 2px)";b.style.width="calc("+(100/n)+"% - 4px)";
       b.innerHTML='<span class="nm"></span><span class="tm"></span>';b.firstChild.textContent=e.title||"(sem nome)";b.lastChild.textContent=e.start+"–"+e.end;
       b.onclick=ev=>{ev.stopPropagation();if(Date.now()-evDragEnd<400)return;if(e.google)openGEvent(e);else openEvent(e.id);};col.appendChild(b);cols[di]=col;evDrag(b,e,cols,days,di,lo,hp);evMenu(b,e);
@@ -3020,6 +3031,18 @@ function agendaEl(){
     cols[di]=col;body.appendChild(col);
   });
   box.append(head);const adr=allDayRow(days);if(adr)box.appendChild(adr);box.append(body);
+  const hd=document.createElement("div");hd.className="aghandle";hd.title="Arraste para mudar a altura da agenda (duplo clique volta ao padrão)";hd.setAttribute("aria-label","Alterar altura da agenda");hd.innerHTML="<i></i>";
+  hd.addEventListener("pointerdown",ev=>{
+    if(ev.button>0)return;ev.preventDefault();
+    const y0=ev.clientY,h0=hp,Z=zoomF();let cur=hp;
+    try{hd.setPointerCapture(ev.pointerId);}catch(x){}
+    const mv=m=>{cur=Math.max(16,Math.min(110,h0+(m.clientY-y0)/Z/H));agApplyHp(box,cur,lo,H);};
+    const up=()=>{hd.removeEventListener("pointermove",mv);hd.removeEventListener("pointerup",up);hd.removeEventListener("pointercancel",up);
+      if(Math.abs(cur-h0)>0.5){agHpSet(Math.round(cur));render();}};
+    hd.addEventListener("pointermove",mv);hd.addEventListener("pointerup",up);hd.addEventListener("pointercancel",up);
+  });
+  hd.addEventListener("dblclick",()=>{agHpSet(0);render();});
+  box.append(hd);
   agSwipe(box);
   return box;
 }
