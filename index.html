@@ -982,6 +982,7 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <label class="fld" id="geEDF"><span>Até</span><input type="date" id="geED"></label>
     </div>
     <label class="fld"><span>Agenda</span><select id="geCal"></select></label>
+    <div class="palette" id="geColors"></div>
     <button type="button" class="linkbtn" id="geDescBtn">+ Descrição</button>
     <label class="fld" id="geDescF"><span>Descrição</span><textarea id="geDesc" rows="2" style="border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;font:inherit;font-size:14px;color:var(--ink);resize:vertical"></textarea></label>
     <p class="lnote" id="geNote"></p>
@@ -3236,7 +3237,7 @@ async function calLoad(from,to,key){
       const ev=await calF(u);
       (ev.items||[]).forEach(e=>{
         if(e.status==="cancelled")return;
-        const base={google:true,title:e.summary||"(sem título)",hex:calColor(c,e),link:e.htmlLink,cal:c.summaryOverride||c.summary||"",gid:e.id,cid:c.id,etag:e.etag,rec:!!(e.recurringEventId||e.recurrence),guests:(e.attendees||[]).filter(a=>!a.self&&!a.resource).length,desc:e.description||"",role:c.accessRole||"",etype:e.eventType||"default",sRaw:(e.start&&(e.start.date||e.start.dateTime))||"",eRaw:(e.end&&(e.end.date||e.end.dateTime))||""};
+        const base={google:true,title:e.summary||"(sem título)",hex:calColor(c,e),link:e.htmlLink,cal:c.summaryOverride||c.summary||"",gid:e.id,cid:c.id,etag:e.etag,rec:!!(e.recurringEventId||e.recurrence),guests:(e.attendees||[]).filter(a=>!a.self&&!a.resource).length,desc:e.description||"",fcolor:(e.extendedProperties&&e.extendedProperties.private&&e.extendedProperties.private.fcolor)||"",role:c.accessRole||"",etype:e.eventType||"default",sRaw:(e.start&&(e.start.date||e.start.dateTime))||"",eRaw:(e.end&&(e.end.date||e.end.dateTime))||""};
         if(e.start&&e.start.date){
           let d=parseISO(e.start.date);const end=parseISO(e.end.date);
           while(d<end){const k=iso(d);(out[k]=out[k]||[]).push(Object.assign({allDay:true,start:"",end:""},base));d=addDays(d,1);}
@@ -3255,6 +3256,7 @@ let calList=[],calPal=null;try{calList=JSON.parse(localStorage.getItem("formiga-
 let calHid=new Set();try{calHid=new Set(JSON.parse(localStorage.getItem("formiga-calhide")||"[]"));}catch(e){}
 let calOv={};try{calOv=JSON.parse(localStorage.getItem("formiga-calcolors")||"{}")||{};}catch(e){}
 function calColor(c,e){
+  const fc=e&&e.extendedProperties&&e.extendedProperties.private&&e.extendedProperties.private.fcolor;if(fc&&PALETTE.includes(fc))return colorVar(fc);
   if(calOv[c.id])return PALETTE.includes(calOv[c.id])?colorVar(calOv[c.id]):calOv[c.id];
   if(e&&e.colorId&&calPal&&calPal[e.colorId])return calPal[e.colorId].background;
   return c.backgroundColor||"#4a7";
@@ -3310,7 +3312,7 @@ function gReason(e){
 }
 function gDT(raw){const d=new Date(raw);return {d:iso(d),t:fmtMin(d.getHours()*60+d.getMinutes())};}
 function openGEdit(e,pre){
-  geCur=e||null;geDelArm=0;geDescOn=false;
+  geCur=e||null;geDelArm=0;geDescOn=false;geColor=e?(e.fcolor||""):"";
   const cals=calList.filter(gWritable);
   const sel=$("#geCal");sel.innerHTML="";
   cals.forEach(c=>{const o=document.createElement("option");o.value=c.id;o.textContent=c.name;sel.appendChild(o);});
@@ -3337,7 +3339,7 @@ function openGEdit(e,pre){
   geAllUI();
   $("#geDel").style.display=e?"":"none";$("#geDel").classList.remove("arm");$("#geDel").textContent="Excluir";
   const a=$("#geLink");if(e&&e.link){a.href=e.link;a.hidden=false;}else a.hidden=true;
-  $("#geNote").dataset.fixed="";geAllUI();
+  $("#geNote").dataset.fixed="";geAllUI();geDrawColors();
   gedlg.showModal();if(!e)$("#geTitle").focus();
 }
 function geFm(){return $("#geCal").value==="__f";}
@@ -3349,10 +3351,16 @@ function geAllUI(){
   $("#geSTF").style.display=all?"none":"";$("#geETF").style.display=all?"none":"";
   if(!$("#geNote").dataset.fixed)$("#geNote").textContent=fm?($("#geRep").checked?"Vai se repetir toda semana, no mesmo dia da semana.":""):(calCanWrite?"":"Para salvar, o Formiga precisa da sua permissão para editar eventos. Ao salvar, o Google vai pedir.");
 }
-let gePrevCal="",geDescOn=false;
+let gePrevCal="",geDescOn=false,geColor="";
+function geCalTone(){const c=calList.find(x=>x.id===$("#geCal").value);if(!c)return colorVar("gray");return calOv[c.id]?(PALETTE.includes(calOv[c.id])?colorVar(calOv[c.id]):calOv[c.id]):(c.backgroundColor||colorVar("gray"));}
+function geDrawColors(){
+  const pal=$("#geColors");pal.innerHTML="";const fm=geFm();
+  if(!fm){const d=document.createElement("button");d.type="button";d.className="dot"+(!geColor?" on":"");d.style.setProperty("--tone",geCalTone());d.title="Cor da agenda";d.setAttribute("aria-label","Cor da agenda");d.onclick=()=>{geColor="";geDrawColors();};pal.appendChild(d);}
+  PALETTE.forEach(k=>{const b=document.createElement("button");b.type="button";b.className="dot"+(geColor===k?" on":"");b.style.setProperty("--tone",colorVar(k));b.setAttribute("aria-label","Cor "+k);b.onclick=()=>{geColor=k;geDrawColors();};pal.appendChild(b);});
+}
 $("#geDescBtn").onclick=()=>{geDescOn=true;geAllUI();$("#geDesc").focus();};
-$("#geRep").addEventListener("change",()=>{const sel=$("#geCal");if($("#geRep").checked){gePrevCal=sel.value;sel.value="__f";sel.disabled=true;}else{sel.disabled=false;if(gePrevCal)sel.value=gePrevCal;}geAllUI();});
-$("#geCal").addEventListener("change",geAllUI);
+$("#geRep").addEventListener("change",()=>{setTimeout(geDrawColors,0);const sel=$("#geCal");if($("#geRep").checked){gePrevCal=sel.value;sel.value="__f";sel.disabled=true;}else{sel.disabled=false;if(gePrevCal)sel.value=gePrevCal;}geAllUI();});
+$("#geCal").addEventListener("change",()=>{geAllUI();geDrawColors();});
 $("#geAll").addEventListener("change",geAllUI);
 let geSDprev="";$("#geSD").addEventListener("focus",()=>{geSDprev=$("#geSD").value;});
 $("#geSD").addEventListener("change",()=>{const ed=$("#geED");if(!ed.value||ed.value===geSDprev||ed.value<$("#geSD").value)ed.value=$("#geSD").value;geSDprev=$("#geSD").value;geAllUI();});
@@ -3385,7 +3393,7 @@ $("#geSave").onclick=async()=>{
   if(cid==="__f"&&!geCur){
     if(!st||!et||toMin(et)<=toMin(st)){toast("O fim precisa ser depois do início");return;}
     state.events=state.events||[];const used=new Set(state.events.map(x=>x.color)),rep=$("#geRep").checked;
-    state.events.push({id:uid(),title:$("#geTitle").value.trim()||"Compromisso",day:rep?parseISO(sd).getDay():null,date:rep?null:sd,start:st,end:et,color:PALETTE.find(k=>!used.has(k))||"blue"});
+    state.events.push({id:uid(),title:$("#geTitle").value.trim()||"Compromisso",day:rep?parseISO(sd).getDay():null,date:rep?null:sd,start:st,end:et,color:geColor||PALETTE.find(k=>!used.has(k))||"blue"});
     save();gedlg.close();render();toast("Compromisso criado no Formiga");return;
   }
   let start,end;const TZ=Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -3397,6 +3405,7 @@ $("#geSave").onclick=async()=>{
   }
   if(!calCanWrite||!calValid()){calAsk(true);toast("Autorize a edição no Google e toque em Salvar de novo");return;}
   const body={summary:$("#geTitle").value.trim()||"(sem título)",description:$("#geDesc").value,start,end};
+  if(geColor)body.extendedProperties={private:{fcolor:geColor}};else if(geCur&&geCur.fcolor)body.extendedProperties={private:{fcolor:null}};
   geBusy=true;$("#geSave").textContent="Salvando…";
   try{
     if(geCur){
