@@ -24,6 +24,10 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 - **Google Agenda:** API REST v3. Leitura (`calList`, eventos, cores), edição e criação (`openGEdit`, `geSave`, `geDel`, `gApi`), `If-Match` com etag, `sendUpdates=none`. Só edita eventos sem convidados, sem repetição e do tipo padrão (`gReason`). A cor do evento escolhida no Formiga fica em `extendedProperties.private.fcolor` e só aparece no Formiga.
 - **Planner:** tabela caixas x tempos. Menu de três traços no canto, clique em título de caixa/tempo, memória de tempos por caixa (`formiga-boxmem`), deslizar para mudar de caixa no celular, bolinhas de página embaixo, ordem global das caixas no Hoje. "Fechar" um modo mostra tela vazia de propósito.
 - **Zoom do texto:** `body{zoom:var(--zoom)}`. Cuidado: `event.offsetX/Y` vem multiplicado pelo zoom. Use `getBoundingClientRect` e divida pela razão `rect.height/offsetHeight` (já corrigido na grade da agenda).
+- **Agenda interativa (v29 a v32):** na grade, arrastar um evento move (muda horário e dia), arrastar a faixa do rodapé redimensiona, arrastar num espaço vazio cria já com duração (`evDrag`, `newDrag`, `evCommit`), passo de 15 min. Mouse começa após 4 px; toque exige toque longo (~0,4 s). Eventos do Google só se movem se `gReason` vazio, com hora e no mesmo dia (PATCH com etag). Botão direito num evento abre menu "Excluir" (`evMenu`, só mouse). Puxador na base da agenda muda a altura da hora (`formiga-aghp`, por aparelho; duplo clique restaura). Janela do compromisso do Formiga tem "Salvar"; Esc fecha as janelas de evento; em tela de toque abrir evento existente não foca o título (`noKbd`).
+- **Posição do clique e zoom:** o Chromium do VS Code devolve `getBoundingClientRect` já em coordenadas com zoom, enquanto `clientY` não. Use sempre `colY`/`rectLocal`/`zoomF` (nunca `offsetHeight` nem `offsetY`).
+- **Listas e notas no computador:** `isSwipe()` é verdadeiro em todo modo que não seja Planner, então Listas e Notas usam o layout em botões (caixa aberta, botão por lista/nota, clique abre) também no desktop.
+- **Cuidado ao declarar:** `const` de diálogos (ex.: `gedlg`) são declarados no meio do script; usá-los antes da declaração derruba o script inteiro e `node --check` não pega. Registrar handlers só depois da declaração.
 - **Excluir:** sem confirmação; o "Desfazer" (`offerUndo`, 7 s) restaura o estado. Para eventos do Google, o desfazer recria o evento. "Apagar tudo e começar do zero" ainda confirma.
 - **Assistente por voz:** `worker.js` (Cloudflare). `ASSIST_URL` ainda é o texto de preenchimento em `index.html`, ou seja, **não está configurado**.
 - Arquivos de apoio: `PUBLICAR.md` (guia de publicação), `NOTAS-IA.md`, `privacidade.html`.
@@ -36,19 +40,18 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 
 ## Estado atual
 
-Publicado e funcionando: tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único.
+Publicado e funcionando (cache `formiga-v32`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
 
-**Alterado, mas não publicado ainda:** retirada das confirmações dos botões de excluir (tarefa, lista, nota, caixa, compromisso, evento do Google), com desfazer também para eventos do Google. Conferir `git status`; se `index.html` e `sw.js` aparecem modificados, falta o "pode publicar" e o commit.
+Nada pendente de publicação. Conferir `git status` mesmo assim.
 
 O backup `formiga-backup-agenda.json` que o Artur recebeu da primeira versão é compatível (formato 4). Importar substitui todos os dados.
 
 ## Próximos passos (ideias, nada combinado ainda)
 
-1. Publicar a retirada das confirmações (aguardando autorização) e testar o desfazer de evento do Google.
-2. Agenda, etapa 2: arrastar e redimensionar eventos na grade.
-3. Agenda, etapa 3: eventos que se repetem e eventos com convidados (hoje só abre no Google).
-4. Mostrar no `PUBLICAR.md` o passo de convidar amigos (hoje não precisa: app em produção; só avisar do "Avançado → Acessar Formiga") e incluir o texto de convite para WhatsApp.
-5. Se o grupo de amigos passar de ~100 pessoas ou o aviso de "não verificado" incomodar: iniciar a verificação do app no Google (exige domínio, política de privacidade e vídeo de demonstração).
-6. Assistente por voz: publicar o `worker.js` na Cloudflare e preencher `ASSIST_URL` (Parte 5 do `PUBLICAR.md`).
-7. Cor do evento aparecer também no Google (usaria as 11 cores do Google em vez da paleta do Formiga). O Artur ainda não decidiu.
-8. Remover do app os itens de exemplo e de teste, se o Artur quiser limpar a base importada.
+1. Testar o desfazer de evento do Google (excluir e mover).
+2. Agenda, etapa 3: eventos que se repetem e eventos com convidados (hoje só abre no Google).
+3. Mostrar no `PUBLICAR.md` o passo de convidar amigos (hoje não precisa: app em produção; só avisar do "Avançado → Acessar Formiga") e incluir o texto de convite para WhatsApp.
+4. Se o grupo de amigos passar de ~100 pessoas ou o aviso de "não verificado" incomodar: iniciar a verificação do app no Google (exige domínio, política de privacidade e vídeo de demonstração).
+5. Assistente por voz: publicar o `worker.js` na Cloudflare e preencher `ASSIST_URL` (Parte 5 do `PUBLICAR.md`).
+6. Cor do evento aparecer também no Google (usaria as 11 cores do Google em vez da paleta do Formiga). O Artur ainda não decidiu.
+7. Remover do app os itens de exemplo e de teste, se o Artur quiser limpar a base importada.
