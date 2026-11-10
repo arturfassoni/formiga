@@ -1,5 +1,5 @@
 // Formiga: funciona offline. Ao publicar uma versão nova, troque o número abaixo.
-const CACHE = "formiga-v33";
+const CACHE = "formiga-v34";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -15,7 +15,7 @@ self.addEventListener("fetch", e => {
   if (/googleapis\.com|accounts\.google\.com|gstatic\.com\/.*gsi/.test(url.href)) return;
   // Página: tenta a rede primeiro (pega atualizações), cai para o cache sem internet
   if (req.mode === "navigate") {
-    e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(CACHE).then(c => c.put("./index.html", cp)); return r; })
+    e.respondWith(fetch(req, { cache: "no-cache" }).then(r => { const cp = r.clone(); caches.open(CACHE).then(c => c.put("./index.html", cp)); return r; })
       .catch(() => caches.match("./index.html")));
     return;
   }

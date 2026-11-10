@@ -40,7 +40,7 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 
 ## Estado atual
 
-Publicado e funcionando (cache `formiga-v32`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
+Publicado e funcionando (cache `formiga-v34`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
 
 Nada pendente de publicação. Conferir `git status` mesmo assim.
 

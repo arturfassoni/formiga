@@ -901,6 +901,7 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
     <p>Desenvolvido por <b>Artur Fassoni</b>.</p>
     <p class="lnote">Software livre sob a licença MIT: use, copie, modifique e compartilhe à vontade, mantendo o crédito ao autor.</p>
     <p class="lnote"><a href="privacidade.html" style="color:inherit">Política de privacidade</a></p>
+    <p class="lnote" id="aVer"></p>
   </div>
 </dialog>
 <dialog id="edlg">
@@ -2904,7 +2905,7 @@ hdlg.addEventListener("close",()=>{try{localStorage.setItem("formiga-welcomed","
 $("#helpBtn").onclick=()=>hdlg.showModal();
 const adlg=$("#adlg");
 $$(".abrand").forEach(x=>x.innerHTML=$(".brand").innerHTML);
-$("#aboutBtn").onclick=()=>adlg.showModal();
+$("#aboutBtn").onclick=()=>{adlg.showModal();const v=$("#aVer");v.textContent="";try{caches.keys().then(ks=>{const k=ks.filter(x=>x.startsWith("formiga-v")).sort((x,y)=>parseInt(x.slice(9))-parseInt(y.slice(9))).pop();v.textContent=k?"Versão "+k.slice(8):"";});}catch(e){}};
 $("#aClose").onclick=()=>adlg.close();
 adlg.addEventListener("click",e=>{if(e.target===adlg)adlg.close();});
 $$("dialog").forEach(d=>d.addEventListener("close",()=>setTimeout(flushPending,300)));
