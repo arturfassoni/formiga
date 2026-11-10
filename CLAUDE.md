@@ -26,6 +26,7 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 - **Zoom do texto:** `body{zoom:var(--zoom)}`. Cuidado: `event.offsetX/Y` vem multiplicado pelo zoom. Use `getBoundingClientRect` e divida pela razão `rect.height/offsetHeight` (já corrigido na grade da agenda).
 - **Agenda interativa (v29 a v32):** na grade, arrastar um evento move (muda horário e dia), arrastar a faixa do rodapé redimensiona, arrastar num espaço vazio cria já com duração (`evDrag`, `newDrag`, `evCommit`), passo de 15 min. Mouse começa após 4 px; toque exige toque longo (~0,4 s). Eventos do Google só se movem se `gReason` vazio, com hora e no mesmo dia (PATCH com etag). Botão direito num evento abre menu "Excluir" (`evMenu`, só mouse). Puxador na base da agenda muda a altura da hora (`formiga-aghp`, por aparelho; duplo clique restaura). Janela do compromisso do Formiga tem "Salvar"; Esc fecha as janelas de evento; em tela de toque abrir evento existente não foca o título (`noKbd`).
 - **Sincronizar (v35):** botão `#syncBtn` no topo (`syncAll`): `gSync()` do Drive + recarrega a Agenda do Google; só aparece se Drive ou Agenda estiverem ligados. A agenda só liga sozinha na primeira conexão (`firstCal` em `authApply`). O app se recarrega sozinho quando há `sw.js` novo (`controllerchange`). Mês é leve (só números, clique vai para o dia). Sombra do arraste por toque é corrigida para o zoom (bloco "Corrige a sombra do arraste" antes de `evDrag`), ainda sem teste em aparelho.
+- **Barra de cima no celular (v36):** `#agBtn` só com ícone, colado nos modos; `.top` sem quebra de linha; logo escondido em ≤430 px. Com um modo "fechado", só a agenda aparece (CSS `body.closed` esconde colhead/weeks/shead exceto `.agenda`) e `#agBtn`/`#syncBtn` continuam visíveis.
 - **Posição do clique e zoom:** o Chromium do VS Code devolve `getBoundingClientRect` já em coordenadas com zoom, enquanto `clientY` não. Use sempre `colY`/`rectLocal`/`zoomF` (nunca `offsetHeight` nem `offsetY`).
 - **Listas e notas no computador:** `isSwipe()` é verdadeiro em todo modo que não seja Planner, então Listas e Notas usam o layout em botões (caixa aberta, botão por lista/nota, clique abre) também no desktop.
 - **Cuidado ao declarar:** `const` de diálogos (ex.: `gedlg`) são declarados no meio do script; usá-los antes da declaração derruba o script inteiro e `node --check` não pega. Registrar handlers só depois da declaração.
@@ -41,7 +42,7 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 
 ## Estado atual
 
-Publicado e funcionando (cache `formiga-v35`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
+Publicado e funcionando (cache `formiga-v36`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
 
 Nada pendente de publicação. Conferir `git status` mesmo assim.
 
