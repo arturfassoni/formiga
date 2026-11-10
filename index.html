@@ -336,23 +336,17 @@ body.nocolor .main [style*="--tone"],body.nocolor #chips [style*="--tone"]{--ton
 .accbox .sgrip{display:none}
 .aglabel{font-size:12.5px;color:var(--muted);font-weight:600;white-space:nowrap;margin:0 4px}
 .agmhead,.agmonth{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
-.agmh{font-size:11px;font-weight:600;color:var(--muted);text-align:center;padding:4px 0;text-transform:lowercase}
-.agmonth{border-top:1px solid var(--line);border-left:1px solid var(--line)}
-.agm{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:78px;padding:4px;text-align:left;background:none;display:flex;flex-direction:column;gap:2px;cursor:pointer;font:inherit;color:inherit;min-width:0}
-.agm:hover{background:var(--soft)}
+.agmh{font-size:11px;font-weight:600;color:var(--muted);text-align:center;padding:2px 0 4px}
+.agmonth{padding:0 0 6px}
+.agm{border:0;min-height:36px;padding:1px 0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;color:inherit;min-width:0}
+.agm .n{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.agm:hover .n{background:var(--soft)}
 .agm.out{opacity:.4}
-.agm .n{font-size:12px;font-weight:700;align-self:flex-start;font-variant-numeric:tabular-nums;padding:0 5px;border-radius:999px}
-.agm.today .n{background:var(--ink);color:var(--surface)}
-.agm .e{font-size:10.5px;line-height:1.25;color:var(--tone);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;gap:3px;align-items:center;font-weight:600}
-.agm .e::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tone);flex:none}
-.agm .more{font-size:10px;color:var(--muted)}
+.agm.today .n{background:var(--ink);color:var(--surface);font-weight:700}
 @media (max-width:860px){
   .kboard{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 12px;margin:0 -12px;padding:0 12px 6px;gap:10px}
   .kboard .kcol{flex:0 0 84%;max-width:none;scroll-snap-align:start}
   .kboard.vert .kcol{flex:none}
-  .agm{min-height:58px;padding:3px 2px}
-  .agm .e{font-size:9.5px}
-  .agm .e::before{display:none}
 }
 body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:54px;height:54px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.22);z-index:45}
@@ -392,7 +386,10 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .utoast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:5px 5px 5px 14px;border-radius:10px;font-size:13px;display:none;align-items:center;gap:8px;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.2);white-space:nowrap}
 .utoast.show{display:flex}
 .utoast button{border:0;background:transparent;color:var(--bg);font-weight:700;padding:6px 10px;border-radius:6px;text-decoration:underline}
-#searchBtn{padding:6px 8px;display:inline-flex;align-items:center}
+#searchBtn,#syncBtn{padding:6px 8px;display:inline-flex;align-items:center}
+#syncBtn[hidden]{display:none}
+#syncBtn.spin svg{animation:fspin .9s linear infinite}
+@keyframes fspin{to{transform:rotate(360deg)}}
 #sdlg{margin-top:8vh}
 #sInput{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:15px;background:var(--bg);color:var(--ink)}
 #sInput:focus{outline:none;border-color:var(--muted)}
@@ -404,18 +401,18 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .sr.done .t{text-decoration:line-through;opacity:.6}
 .sres .sempty{padding:10px 8px}
 .help p{margin:0;font-size:14px;line-height:1.55}
-.agenda{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 10px 12px;margin:0 0 16px;--hp:34px}
-.agbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.agenda{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px var(--ap) 0;margin:0 0 12px;--hp:28px;--ap:10px;overflow:hidden}
+.agbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .agbar .sp{flex:1}
 .agbar .futbtn{padding:4px 11px;font-size:12.5px}
 .aghead,.agbody{display:grid;grid-template-columns:40px repeat(var(--n),minmax(0,1fr))}
-.agh{font-size:11.5px;font-weight:600;text-align:center;padding:2px 0 6px;color:var(--muted);text-transform:lowercase}
-.agh span{display:block}
+.agh{font-size:11.5px;font-weight:600;text-align:center;padding:0 0 4px;white-space:nowrap;color:var(--muted);text-transform:lowercase}
+.agh span{display:inline;margin-right:3px}
 .agh b{display:inline-block;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
 .agh.today b{color:var(--surface);background:var(--ink);border-radius:999px;display:inline-block;padding:1px 7px}
 .agtimes{position:relative}
-.aghandle{height:16px;margin:4px 0 -6px;display:flex;align-items:center;justify-content:center;cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none}
-.aghandle i{display:block;width:44px;height:4px;border-radius:3px;background:var(--line)}
+.aghandle{height:12px;margin:0 calc(-1*var(--ap));display:flex;align-items:center;justify-content:center;cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none}
+.aghandle i{display:block;width:40px;height:3px;border-radius:3px;background:var(--line)}
 .aghandle:hover i{background:var(--muted)}
 .agt{position:absolute;right:6px;font-size:10.5px;color:var(--muted);transform:translateY(-6px);font-variant-numeric:tabular-nums}
 .agcol{position:relative;border-left:1px solid var(--line);cursor:default;background-image:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent var(--hp))}
@@ -452,7 +449,7 @@ a.btn{color:var(--ink);text-decoration:none}
   #agAdd{padding:3px 9px!important;font-size:15px!important;font-weight:600}
 }
 .agrefresh{padding:5px 8px;display:inline-flex;align-items:center}
-@media (max-width:860px){#agAdd .lg{display:none}#agAdd .sm{display:inline}#agAdd{padding:4px 10px;font-size:12.5px}.agenda{--hp:30px;padding:8px 6px 10px}.aghead,.agbody{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.ev{font-size:10.5px;padding:2px 3px}}
+@media (max-width:860px){#agAdd .lg{display:none}#agAdd .sm{display:inline}#agAdd{padding:4px 10px;font-size:12.5px}.agenda{--hp:24px;--ap:6px;padding:6px var(--ap) 0}.aghead,.agbody{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.ev{font-size:10.5px;padding:2px 3px}}
 .brand.abrand{margin:2px 0 0;justify-content:center}
 .brand.abrand svg{width:76px;height:76px}
 .help .lead{font-size:15px;text-align:center;color:var(--ink);padding:0 6px 4px}
@@ -714,7 +711,7 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
   .modes button{font-size:13.5px;padding:5px 9px}
   .brand svg{width:28px;height:28px}
   .top{gap:6px}
-  #searchBtn{padding:6px 5px}
+  #searchBtn,#syncBtn{padding:6px 5px}
   .modes{gap:4px}
   .week.sect .wlabel{align-items:center}
   .week.sect .wlabel .permtgl{order:0;margin:0 0 0 auto}
@@ -776,6 +773,7 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
   <button class="btn desk listasOnly" id="catsBtn">Caixas</button>
   <button class="btn" id="goNow" title="Ir para esta semana"><span class="lg">Esta semana</span><span class="sm">Hoje</span></button>
   <div class="menu">
+    <button class="btn ghost" id="syncBtn" aria-label="Sincronizar" title="Sincronizar agenda e dados" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.5-3.55"/><path d="M13 2.5v3h-3"/></svg></button>
     <button class="btn ghost" id="searchBtn" aria-label="Buscar" title="Buscar (/)"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="7" cy="7" r="4.6"/><path d="M10.5 10.5l3.2 3.2"/></svg></button>
     <button class="btn ghost" id="menuBtn" aria-haspopup="true" aria-label="Mais opções">•••</button>
     <div class="menu-pop" id="menuPop">
@@ -2952,16 +2950,11 @@ function agSwipe(box){
 function monthEl(days){
   const w=document.createElement("div");const a=anchorDate(),today=iso(new Date());
   const hd=document.createElement("div");hd.className="agmhead";
-  days.slice(0,7).forEach(d=>{const x=document.createElement("div");x.className="agmh";x.textContent=DIAS[d.getDay()];hd.appendChild(x);});
+  days.slice(0,7).forEach(d=>{const x=document.createElement("div");x.className="agmh";x.textContent=DIAS[d.getDay()].slice(0,1).toUpperCase();hd.appendChild(x);});
   const g=document.createElement("div");g.className="agmonth";
   days.forEach(d=>{
     const c=document.createElement("button");c.type="button";c.className="agm"+(d.getMonth()!==a.getMonth()?" out":"")+(iso(d)===today?" today":"");
     const n=document.createElement("span");n.className="n";n.textContent=d.getDate();c.appendChild(n);
-    const evs=eventsOn(d).concat(gEventsOn(d)).sort((x,y)=>toMin(x.start)-toMin(y.start));
-    const ad=(typeof calCache!=="undefined"&&calWanted()&&calCache[iso(d)]||[]).filter(e=>e.allDay);
-    const all=ad.concat(evs);const max=mq.matches?2:3;
-    all.slice(0,max).forEach(e=>{const s=document.createElement("span");s.className="e";s.style.setProperty("--tone",e.hex||colorVar(e.color));s.textContent=(e.start&&!mq.matches?e.start+" ":"")+(e.title||"");c.appendChild(s);});
-    if(all.length>max){const m=document.createElement("span");m.className="more";m.textContent="+"+(all.length-max);c.appendChild(m);}
     c.onclick=()=>{agAnchor=iso(d);agRange=agPrev&&agPrev!=="m"?agPrev:(mq.matches?"3":"5");try{localStorage.setItem("formiga-agrange",agRange);}catch(e){}render();};
     g.appendChild(c);
   });
@@ -2991,18 +2984,12 @@ function agendaEl(){
   nav.append(pv,lb,nx);bar.appendChild(nav);
   const add=document.createElement("button");add.type="button";add.className="btn";add.innerHTML='<span class="lg">+ Compromisso</span><span class="sm">+</span>';add.title="Novo compromisso";add.setAttribute("aria-label","Novo compromisso");add.id="agAdd";
   add.onclick=()=>{const t=new Date();newAny(iso(t),Math.min(22*60,(t.getHours()+1)*60));};bar.appendChild(add);
-  if(calWanted()&&gConfigured){
-    const rb=document.createElement("button");rb.type="button";rb.className="btn agrefresh";rb.title="Atualizar Google Agenda";rb.setAttribute("aria-label","Atualizar Google Agenda");
-    rb.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.5-3.55"/><path d="M13 2.5v3h-3"/></svg>';
-    rb.onclick=()=>{if(calValid()){calKey="";calCache={};toast("Atualizando…");render();}else calAsk(true);};
-    bar.insertBefore(rb,add);
-  }
   box.appendChild(bar);
   const days=agDays();calTouch(days);lb.textContent=agLabel(days);
   if(getRange()==="m"){add.hidden=true;box.appendChild(monthEl(days));agSwipe(box);return box;}const evs=days.map(d=>eventsOn(d).concat(gEventsOn(d)));
   let lo=8*60,hi=18*60;
   evs.flat().forEach(e=>{lo=Math.min(lo,Math.floor(toMin(e.start)/60)*60);hi=Math.max(hi,Math.ceil(toMin(e.end)/60)*60);});
-  const hpDef=mq.matches?30:34,hp=agHpGet()||hpDef,H=(hi-lo)/60;
+  const hpDef=mq.matches?24:28,hp=agHpGet()||hpDef,H=(hi-lo)/60;
   box.style.setProperty("--n",days.length);box.style.setProperty("--hp",hp+"px");
   const head=document.createElement("div");head.className="aghead";head.appendChild(document.createElement("div"));
   const today=iso(new Date());
@@ -3067,6 +3054,28 @@ function evMenu(b,e){
     document.addEventListener("pointerdown",off,true);document.addEventListener("keydown",off,true);window.addEventListener("scroll",off,true);window.addEventListener("resize",off);
   });
 }
+
+/* ---------- Corrige a sombra do arraste no toque (zoom do texto) ---------- */
+(function(){
+  const fixG=g=>{
+    const Z=zoomF();if(Math.abs(Z-1)<0.01)return;
+    if(!g.dataset.zf){
+      g.dataset.zf="1";const w=parseFloat(g.style.width);
+      if(w>0&&g.getBoundingClientRect().width>w*(1+(Z-1)/2)){
+        ["top","left","width","height"].forEach(k=>{const v=parseFloat(g.style[k]);if(!isNaN(v))g.style[k]=(v/Z)+"px";});
+      }
+    }
+    const t=g.style.transform;
+    if(t&&t!==g.dataset.zt){
+      const m=/translate3d\(\s*(-?[\d.]+)px,\s*(-?[\d.]+)px/.exec(t);
+      if(m){g.style.transform="translate3d("+(m[1]/Z)+"px,"+(m[2]/Z)+"px,0)";g.dataset.zt=g.style.transform;}
+    }
+  };
+  const all=()=>{document.querySelectorAll(".sortable-fallback").forEach(fixG);};
+  new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.classList&&n.classList.contains("sortable-fallback"))fixG(n);}).observe(document.documentElement,{childList:true,subtree:true});
+  const mv=()=>{if(document.querySelector(".sortable-fallback"))requestAnimationFrame(all);};
+  document.addEventListener("pointermove",mv,true);document.addEventListener("touchmove",mv,true);
+})();
 
 /* ---------- Arrastar e redimensionar eventos na grade ---------- */
 let evDragging=false,evDragEnd=0;
@@ -3278,10 +3287,10 @@ function authApply(tok,exp,scope){
     gUI();gSync();
   }
   if(hasSc(scope,GCAL_READ)&&(calWanted()||pendCal)){
-    calToken=tok;calExp=exp;pendCal=false;calCanWrite=hasSc(scope,GCAL_EDIT);
+    const firstCal=pendCal;calToken=tok;calExp=exp;pendCal=false;calCanWrite=hasSc(scope,GCAL_EDIT);
     try{localStorage.setItem("formiga-gcal","1");}catch(e){}
     calCache={};calKey="";calUI();
-    state.prefs=state.prefs||{};if(!state.prefs.showAgenda){state.prefs.showAgenda=true;save();}
+    if(firstCal){state.prefs=state.prefs||{};if(!state.prefs.showAgenda){state.prefs.showAgenda=true;save();}}
     render();
   }
 }
@@ -3349,6 +3358,7 @@ async function gPull(){
   }catch(e){}
 }
 function gUI(){
+  syncUI();
   const bar=$("#gbar"),m=$("#gMenu");
   if(!gConfigured){bar.hidden=true;m.hidden=true;return;}
   m.hidden=false;
@@ -3380,8 +3390,23 @@ let calClient=null,calToken=null,calExp=0,calCache={},calKey="",calLoading=false
 const calWanted=()=>{try{return localStorage.getItem("formiga-gcal")==="1";}catch(e){return false;}};
 const calValid=()=>!!calToken&&Date.now()<calExp;
 function calInit(){}
+function syncUI(){const b=document.getElementById("syncBtn");if(b)b.hidden=!(gConfigured&&(gWanted()||calWanted()));}
+async function syncAll(){
+  const b=$("#syncBtn");if(!b||b.classList.contains("spin"))return;
+  const gw=gConfigured&&gWanted(),cw=gConfigured&&calWanted();
+  if(!gw&&!cw){toast("Entre com o Google no menu para sincronizar");return;}
+  if((gw&&!gValid())||(cw&&!calValid())){toast("Reconectando ao Google…");authAsk({prompt:""});return;}
+  b.classList.add("spin");
+  try{
+    if(gw)await gSync();
+    if(cw){calKey="";calCache={};}
+    render();
+    toast("Sincronizado");
+  }finally{b.classList.remove("spin");}
+}
+$("#syncBtn").onclick=syncAll;
 function calAsk(interactive){if(interactive)pendCal=true;authAsk(interactive?{}:{prompt:""});}
-function calUI(){const m=$("#calMenu");if(!gConfigured){m.hidden=true;return;}m.hidden=false;m.textContent=calWanted()?"Ocultar Google Agenda":"Mostrar Google Agenda";$("#calColorsBtn").hidden=!calWanted();}
+function calUI(){syncUI();const m=$("#calMenu");if(!gConfigured){m.hidden=true;return;}m.hidden=false;m.textContent=calWanted()?"Ocultar Google Agenda":"Mostrar Google Agenda";$("#calColorsBtn").hidden=!calWanted();}
 $("#calMenu").onclick=()=>{
   if(calWanted()){try{localStorage.setItem("formiga-gcal","0");}catch(e){}calToken=null;calCache={};calKey="";calUI();render();toast("Google Agenda oculto");}
   else calAsk(true);
@@ -3725,7 +3750,18 @@ function xApply(){
 
 gInit();
 calInit();
-if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker" in navigator&&location.protocol==="https:"){
+  const hadSW=!!navigator.serviceWorker.controller;let reloading=false;
+  navigator.serviceWorker.register("sw.js").then(reg=>{
+    const chk=()=>{try{reg.update();}catch(e){}};
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")chk();});
+    setInterval(chk,30*60*1000);
+  }).catch(()=>{});
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(!hadSW||reloading)return;reloading=true;
+    const go=()=>{if(isBusy())setTimeout(go,3000);else location.reload();};go();
+  });
+}
 
 /* ---------- Abas do Planner ---------- */
 const tdlg=$("#tdlg");
