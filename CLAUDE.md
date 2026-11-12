@@ -34,6 +34,8 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 - **Assistente por voz:** `worker.js` (Cloudflare). `ASSIST_URL` ainda é o texto de preenchimento em `index.html`, ou seja, **não está configurado**.
 - Arquivos de apoio: `PUBLICAR.md` (guia de publicação), `NOTAS-IA.md`, `privacidade.html`.
 
+- **v37:** cores de evento = as 11 cores do Google (`GCOL`, `gcHex`, `evTone`); eventos do Google gravam `colorId` (aparece no Google Agenda), compromissos do Formiga guardam `color:"gNN"`; `fcolor` antigo ainda é lido. Linha da hora atual (`.nowline`, `nowTick`). Agenda do Google carrega janela larga (-14/+43 dias) e guarda `calRaw` por 10 min (navegar não espera rede). Eventos que se repetem: edita, move e exclui só a ocorrência (PATCH no id da instância; mover de agenda desativado). Botão ✓ no formulário de nova tarefa. Menu: "Importar notas do Keep (.html)" (`keepParse`, vai para a caixa de notas "Keep", ignora notas na lixeira; checklist vira linhas ☐/☑).
+
 ## Google Cloud (projeto do Formiga)
 
 - Status da tela de permissão: **Em produção**, app **não verificado**. Quem entra vê "O Google não verificou este app" e precisa tocar em **Avançado → Acessar Formiga (não seguro)** na primeira vez. Limite de 100 usuários até a verificação. Não há lista de usuários de teste nem expiração de 7 dias.
@@ -42,7 +44,7 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 
 ## Estado atual
 
-Publicado e funcionando (cache `formiga-v36`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
+Publicado e funcionando (cache `formiga-v37`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
 
 Nada pendente de publicação. Conferir `git status` mesmo assim.
 
