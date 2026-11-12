@@ -404,6 +404,13 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 .agenda{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px var(--ap) 0;margin:0 0 12px;--hp:28px;--ap:10px;overflow:hidden}
 .agbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .agbar .sp{flex:1}
+.agenda.agsd{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:6px;align-content:start}
+.agenda.agsd>*{grid-column:1}
+.agenda.agsd>.agside{grid-column:2;grid-row:1/span 8;display:flex;flex-direction:column;gap:6px;align-self:start;margin-top:2px}
+.agside .gap{margin-top:8px}
+.agside .futbtn{font-size:15px!important}
+.agenda.agsd .aghandle{margin-right:0}
+.agside .futbtn{width:30px;height:30px;padding:0!important;justify-content:center;font-size:13px!important;letter-spacing:0}
 .agbar .futbtn{padding:4px 11px;font-size:12.5px}
 .aghead,.agbody{display:grid;grid-template-columns:40px repeat(var(--n),minmax(0,1fr))}
 .agh{font-size:11.5px;font-weight:600;text-align:center;padding:0 0 4px;white-space:nowrap;color:var(--muted);text-transform:lowercase}
@@ -819,6 +826,7 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
       <button id="helpBtn">Como usar</button>
       <button id="aboutBtn">Sobre</button>
       <hr class="msep">
+      <button id="agSideBtn"></button>
       <button id="gMenu" hidden></button>
       <button id="calMenu" hidden></button>
       <button id="calColorsBtn" hidden>Agendas e cores do Google</button>
@@ -3039,13 +3047,19 @@ function agApplyHp(box,hp,lo,H){
   const tl=$(".agtimes",box);if(tl){tl.style.height=(H*hp)+"px";$$(".agt",tl).forEach(t=>{t.style.top=(t.dataset.i*hp)+"px";});}
   $$(".agcol .ev[data-s]",box).forEach(b=>{const s=+b.dataset.s,en=+b.dataset.e;b.style.top=((s-lo)/60*hp+1)+"px";b.style.height=Math.max(16,(en-s)/60*hp-2)+"px";});
 }
+function agSide(){try{return localStorage.getItem("formiga-agside")==="1";}catch(e){return false;}}
+function agSideUI(){$("#agSideBtn").textContent=agSide()?"Botões da agenda no topo":"Botões da agenda na lateral";}
+$("#agSideBtn").onclick=()=>{try{if(agSide())localStorage.removeItem("formiga-agside");else localStorage.setItem("formiga-agside","1");}catch(e){}agSideUI();render();};
+agSideUI();
 function agendaEl(){
   const box=document.createElement("div");box.className="agenda";
   const bar=document.createElement("div");bar.className="agbar";
-  [["1","Hoje"],["3","3 dias"],["5","Seg–sex"],["7","Semana"],["m","Mês"]].forEach(([k,l])=>{
-    const b=document.createElement("button");b.type="button";b.className="futbtn"+(getRange()===k?" open":"");b.textContent=l;
-    b.onclick=()=>{if(k==="1"){const td=iso(new Date());if(!agDays().some(d=>iso(d)===td)){agAnchor=null;render();return;}}if(k==="m"&&getRange()!=="m")agPrev=getRange();if(k==="1")agAnchor=null;agRange=k;try{localStorage.setItem("formiga-agrange",k);}catch(e){}render();};bar.appendChild(b);
+  const side=agSide(),sideBox=document.createElement("div");sideBox.className="agside";if(side)box.classList.add("agsd");
+  [["1","Hoje","H"],["3","3 dias","3"],["5","Seg–sex","5"],["7","Semana","7"],["m","Mês","M"]].forEach(([k,l,sh])=>{
+    const b=document.createElement("button");b.type="button";b.className="futbtn"+(getRange()===k?" open":"");b.textContent=side?sh:l;if(side){b.title=l;b.setAttribute("aria-label",l);}
+    b.onclick=()=>{if(k==="1"){const td=iso(new Date());if(!agDays().some(d=>iso(d)===td)){agAnchor=null;render();return;}}if(k==="m"&&getRange()!=="m")agPrev=getRange();if(k==="1")agAnchor=null;agRange=k;try{localStorage.setItem("formiga-agrange",k);}catch(e){}render();};(side?sideBox:bar).appendChild(b);
   });
+  if(side)box.appendChild(sideBox);
   const sp=document.createElement("span");sp.className="sp";bar.appendChild(sp);
   const nav=document.createElement("div");nav.className="agnav";
   const pv=document.createElement("button");pv.type="button";pv.className="ib";pv.textContent="‹";pv.setAttribute("aria-label","Anterior");pv.onclick=()=>agShift(-1);
@@ -3056,6 +3070,11 @@ function agendaEl(){
   add.onclick=()=>{const t=new Date();newAny(iso(t),Math.min(22*60,(t.getHours()+1)*60));};bar.appendChild(add);
   box.appendChild(bar);
   const days=agDays();calTouch(days);lb.textContent=agLabel(days);
+  if(side){
+    [pv,nx,add].forEach(x=>{x.className="futbtn";sideBox.appendChild(x);});
+    pv.classList.add("gap");add.textContent="+";
+    if(getRange()!=="m")bar.remove();
+  }
   if(getRange()==="m"){add.hidden=true;box.appendChild(monthEl(days));agSwipe(box);return box;}const evs=days.map(d=>eventsOn(d).concat(gEventsOn(d)));
   let lo=8*60,hi=18*60;
   evs.flat().forEach(e=>{lo=Math.min(lo,Math.floor(toMin(e.start)/60)*60);hi=Math.max(hi,Math.ceil(toMin(e.end)/60)*60);});
