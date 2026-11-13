@@ -8,8 +8,9 @@
 <meta name="theme-color" content="#E2E3E1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#151918" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -371,15 +372,15 @@ body[data-view="kanban"][data-mode="planner"] #colhead{display:none}
 @media (max-width:860px){.agallday{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.fab{right:14px;width:50px;height:50px}}
 .gbar{position:relative;padding-right:40px}
 .gbar .x{position:absolute;top:6px;right:6px}
-:root{--ant:#3a2e26;--ant-hi:#8c7866;--leaf:#2f6b34;--vein:#7fb36d}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ant:#cdbcaa;--ant-hi:#7d6d5f;--leaf:#4a9a50;--vein:#a7d396}}
-:root[data-theme="dark"]{--ant:#cdbcaa;--ant-hi:#7d6d5f;--leaf:#4a9a50;--vein:#a7d396}
+:root{--ant:#1C2320;--ant-hi:#8c7866;--leaf:#4C9A38;--vein:#17301F}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ant:#F3F5EE;--ant-hi:#7d6d5f;--leaf:#7FCB5C;--vein:#16241B}}
+:root[data-theme="dark"]{--ant:#F3F5EE;--ant-hi:#7d6d5f;--leaf:#7FCB5C;--vein:#16241B}
 .brand{order:-4;display:flex;align-items:center;margin-right:2px}
 .brand svg{width:34px;height:34px;display:block}
 .brand .lf{fill:var(--leaf)}
-.brand .vn{fill:none;stroke:var(--vein);stroke-linecap:round}
+.brand .vn{fill:none;stroke:var(--vein);stroke-width:9;stroke-linecap:round}
 .brand .am{fill:var(--ant)}
-.brand .aw{fill:none;stroke:var(--ant);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.brand .aw{fill:none;stroke:var(--ant);stroke-width:17;stroke-linecap:round;stroke-linejoin:round}
 .brand .ah{fill:none;stroke:var(--ant-hi);stroke-width:.9;stroke-linecap:round}
 .msep{border:0;border-top:1px solid var(--line);margin:5px 4px}
 .mhead{font-size:11px;font-weight:700;color:var(--muted);padding:6px 10px 2px}
@@ -461,6 +462,8 @@ a.btn{color:var(--ink);text-decoration:none}
 @media (max-width:860px){#agAdd .lg{display:none}#agAdd .sm{display:inline}#agAdd{padding:4px 10px;font-size:12.5px}.agenda{--hp:24px;--ap:6px;padding:6px var(--ap) 0}.aghead,.agbody{grid-template-columns:32px repeat(var(--n),minmax(0,1fr))}.ev{font-size:10.5px;padding:2px 3px}}
 .brand.abrand{margin:2px 0 0;justify-content:center}
 .brand.abrand svg{width:76px;height:76px}
+.tips{list-style:none;margin:10px 0 4px;padding:0;display:flex;flex-direction:column;gap:9px;font-size:14px;line-height:1.45}
+.tips li{padding-left:12px;border-left:3px solid var(--leaf)}
 .help .lead{font-size:15px;text-align:center;color:var(--ink);padding:0 6px 4px}
 .mrow-modes{align-items:flex-start}
 .mchecks{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
@@ -781,7 +784,7 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
 <body data-view="semanas">
 
 <header class="top">
-  <span class="brand" title="Formiga"><svg viewBox="6 6 50 52" aria-hidden="true"><path class="lf" d="M43.5 30.5C40 14 24 6.5 8.5 8.5C12 22 26 32 43.5 30.5Z"/><path class="vn" d="M43.5 30.5Q27 19 8.5 8.5" stroke-width="1.1"/><path class="vn" d="M35 24.6L33.5 17.2M28.5 20.6L25.8 13.4M22 16.8L18.6 11M36.8 25.8L30 27.6M30 21.8L22.6 23.2M23.4 17.6L16.8 18.4" stroke-width=".8"/><path class="aw" d="M34 44L39 48.5L42.5 55.5M31.5 45L31.5 50L34 56M29 44.5L23.5 49L21.5 55.5"/><ellipse class="am" cx="16.5" cy="44.5" rx="9" ry="6.3" transform="rotate(-14 16.5 44.5)"/><circle class="am" cx="26.6" cy="43.2" r="1.9"/><ellipse class="am" cx="32" cy="42.3" rx="5.2" ry="3.3" transform="rotate(-12 32 42.3)"/><circle class="am" cx="40.6" cy="37.6" r="4.4"/><path class="ah" d="M10.5 42.5Q13 47.5 15.5 41Q18 47 20.5 40.8Q22.5 45 23.5 42.5M29 41.6Q32 44 35 40.8"/><path class="aw" d="M43.8 39.5L45.2 34.6L43.5 30.5"/><path class="aw" stroke-width="1.6" d="M42 34Q45 28.5 50.5 28.8M43.6 35.4Q48 31.8 53 33.4"/></svg></span>
+  <span class="brand" title="Formiga"><svg viewBox="88 76 356 368" aria-hidden="true"><g transform="translate(256 256) scale(.98) translate(-266 -262)"><path class="lf" d="M346 236C338 130 236 78 112 92C128 196 232 262 346 236Z"/><path class="vn" d="M330 228Q226 150 138 106"/><g class="aw"><path d="M236 338L204 384L190 432M258 344L262 394L284 434M282 338L322 378L346 430"/><path d="M360 268Q388 236 424 244M366 284Q398 262 432 280"/><path d="M346 262L348 236"/></g><ellipse class="am" cx="148" cy="326" rx="72" ry="52" transform="rotate(-12 148 326)"/><ellipse class="am" cx="258" cy="320" rx="44" ry="29" transform="rotate(-8 258 320)"/><circle class="am" cx="338" cy="292" r="39"/></g></svg></span>
   <nav class="modes" id="modes" aria-label="Função">
     <button type="button" data-m="planner" class="on">Planner</button>
     <button type="button" data-m="listas">Listas</button>
@@ -1047,13 +1050,14 @@ dialog::backdrop{background:rgba(15,20,18,.35)}
   <div class="sheet help">
     <div class="dhead"><h3>Bem-vindo ao Formiga</h3><button type="button" class="x" id="hClose" aria-label="Fechar">×</button></div>
     <div class="brand abrand"></div>
-    <p class="lead">A formiga pega a folha e carrega, uma de cada vez, mesmo quando ela pesa. Aqui você organiza as suas folhas: o que carregar nesta semana, o que fica para depois e o que lembrar sempre.</p>
-    <p><b>Agenda.</b> Ligue a grade de compromissos no topo das semanas e toque num horário vazio para criar um. Aulas e reuniões podem se repetir toda semana.</p>
-    <p><b>Planner.</b> Cada linha é uma semana e cada caixa é uma área da vida. Arraste os cards entre semanas e caixas. Em cada caixa, <b>+</b> adiciona, <b>▭</b> cria um espaço e <b>↓</b> adia o que ficou pendente.</p>
-    <p>A tabela cruza <b>caixas</b> (áreas da vida) e <b>blocos de tempo</b>: Hoje, Semana, Próxima, Mês, <b>Planos</b> (ideias sem data) e <b>Sempre</b> (hábitos e lembretes). Os botões acima escolhem o que aparece. No computador, Todas e Todos mostram a tabela inteira; no celular, uma coluna por vez. O <b>Relatório</b>, no menu •••, mostra tudo o que você concluiu.</p>
-    <p><b>Listas</b> são para compras, filmes, viagens. <b>Notas</b>, para textos livres. As duas também se organizam em caixas.</p>
-    <p>A lupa busca em tudo. No menu <b>•••</b> você escolhe o dia em que a semana começa e quais funções aparecem.</p>
-    <p><b>Seus dados.</b> Entre com o Google para guardar tudo numa pasta privada do app no seu Google Drive e usar no celular e no computador. Ninguém mais tem acesso.</p>
+    <p class="lead">A formiga carrega uma folha de cada vez. Aqui você organiza as suas: o que fazer agora, o que fica para depois e o que lembrar sempre.</p>
+    <ul class="tips">
+      <li><b>Planner.</b> Linhas são o tempo (Hoje, Semana, Próxima, Mês, Planos, Sempre) e colunas são as áreas da vida. Arraste os cards entre elas.</li>
+      <li><b>Agenda.</b> Toque num horário vazio para criar um compromisso. Arraste para mover e puxe a base para mudar a duração.</li>
+      <li><b>Listas e Notas.</b> Compras, filmes, viagens e textos livres, também em caixas.</li>
+      <li><b>Busca.</b> A lupa procura em tudo.</li>
+      <li><b>Seus dados.</b> Entre com o Google para guardar numa pasta privada do seu Drive e usar no celular e no computador.</li>
+    </ul>
     <p class="lnote">Tudo aqui é exemplo: edite ou apague à vontade, ou use ••• → Apagar tudo e começar do zero.</p>
     <div><button type="button" class="btn" id="hGo" autofocus>Começar</button></div>
   </div>
@@ -3355,9 +3359,43 @@ const GCAL_READ="https://www.googleapis.com/auth/calendar.readonly";
 let authClient=null,authSig="",pendDrive=false,pendCal=false,lastSilent=0;
 const hasSc=(scope,need)=>need.split(" ").every(x=>String(scope||"").split(" ").includes(x));
 function authScopes(){const a=[];if(gWanted()||pendDrive)a.push(G_SCOPE);if(calWanted()||pendCal)a.push(GCAL_SCOPE);return a.join(" ");}
+const apiOn=()=>!ASSIST_URL.startsWith("COLE_AQUI");
+const apiUrl=p=>ASSIST_URL.replace(/\/+$/,"")+p;
+const getRT=()=>{try{return localStorage.getItem("formiga-rt")||"";}catch(e){return "";}};
+const rtDrop=()=>{if(!gWanted()&&!calWanted()){try{localStorage.removeItem("formiga-rt");}catch(e){}}};
+let rtBusy=false;
+/* Renovação sem pop-up: o Worker troca o "refresh token" por um token novo (guarda o segredo do app). */
+async function authRefresh(){
+  const rt=getRT();if(!rt||!apiOn()||rtBusy)return false;
+  rtBusy=true;
+  try{
+    const r=await fetch(apiUrl("/auth/refresh"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refresh_token:rt})});
+    const j=await r.json();
+    if(r.ok&&j.access_token){authOnToken(j);return true;}
+    if(j&&j.invalido){try{localStorage.removeItem("formiga-rt");}catch(e){}}
+  }catch(e){}finally{rtBusy=false;}
+  return false;
+}
+async function authExchange(code){
+  try{
+    const r=await fetch(apiUrl("/auth/code"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})});
+    const j=await r.json();
+    if(r.ok&&j.access_token){if(j.refresh_token){try{localStorage.setItem("formiga-rt",j.refresh_token);}catch(e){}}authOnToken(j);return;}
+  }catch(e){}
+  pendDrive=false;pendCal=false;gUI();calUI();toast("Não consegui entrar. Tente de novo.");
+}
 function authAsk(opts){
+  if(opts&&opts.prompt===""&&!opts.noRT&&getRT()&&apiOn()){authRefresh().then(ok=>{if(!ok)authAsk(Object.assign({},opts,{noRT:true}));});return;}
   if(!(window.google&&google.accounts&&google.accounts.oauth2)){toast("Carregando o login do Google… tente de novo em instantes");return;}
   const sc=authScopes();if(!sc)return;
+  if(apiOn()&&!(opts&&opts.prompt==="")&&google.accounts.oauth2.initCodeClient){
+    let h="";try{h=localStorage.getItem("formiga-hint")||"";}catch(e){}
+    const cc=google.accounts.oauth2.initCodeClient({client_id:GOOGLE_CLIENT_ID,scope:sc,ux_mode:"popup",login_hint:h||undefined,
+      callback:r=>{if(r&&r.code)authExchange(r.code);else{pendDrive=false;pendCal=false;gUI();calUI();}},
+      error_callback:()=>{pendDrive=false;pendCal=false;gUI();calUI();}});
+    try{cc.requestCode();}catch(e){}
+    return;
+  }
   if(!authClient||authSig!==sc){
     authSig=sc;const cfg={client_id:GOOGLE_CLIENT_ID,scope:sc,include_granted_scopes:true,callback:authOnToken,error_callback:()=>{pendDrive=false;pendCal=false;gUI();calUI();}};
     let h="";try{h=localStorage.getItem("formiga-hint")||"";}catch(e){}if(h)cfg.hint=h;
@@ -3462,7 +3500,7 @@ $("#gbarBtn").onclick=gSignIn;
 $("#gbarX").onclick=()=>{gBarClosed=true;gUI();};
 $("#gMenu").onclick=()=>{
   if(gWanted()){
-    gToken=null;gFileId=null;try{localStorage.setItem("formiga-google","0");}catch(e){}
+    gToken=null;gFileId=null;try{localStorage.setItem("formiga-google","0");}catch(e){}rtDrop();
     setStatus("Salvo neste aparelho");toast("Desconectado do Google Drive");gBarClosed=false;gUI();
   }else gSignIn();
 };
@@ -3499,7 +3537,7 @@ $("#syncBtn").onclick=syncAll;
 function calAsk(interactive){if(interactive)pendCal=true;authAsk(interactive?{}:{prompt:""});}
 function calUI(){syncUI();const m=$("#calMenu");if(!gConfigured){m.hidden=true;return;}m.hidden=false;m.textContent=calWanted()?"Ocultar Google Agenda":"Mostrar Google Agenda";$("#calColorsBtn").hidden=!calWanted();}
 $("#calMenu").onclick=()=>{
-  if(calWanted()){try{localStorage.setItem("formiga-gcal","0");}catch(e){}calToken=null;calCache={};calKey="";calUI();render();toast("Google Agenda oculto");}
+  if(calWanted()){try{localStorage.setItem("formiga-gcal","0");}catch(e){}rtDrop();calToken=null;calCache={};calKey="";calUI();render();toast("Google Agenda oculto");}
   else calAsk(true);
 };
 function calTouch(days){
@@ -3853,6 +3891,24 @@ function xApply(){
   save();xdlg.close();$("#xText").value="";$("#xOut").innerHTML="";render();
   offerUndo(pv,n+(n===1?" item criado":" itens criados"));
 }
+
+/* Atalhos do ícone (?novo=tarefa|compromisso|assistente) */
+(function(){
+  let q="";try{q=new URLSearchParams(location.search).get("novo")||"";}catch(e){}
+  if(!q)return;
+  try{history.replaceState(null,"",location.pathname);}catch(e){}
+  setTimeout(()=>{
+    try{
+      if(q==="assistente"){if(assistOn)$("#fab").click();else toast("O assistente ainda não está configurado");return;}
+      if(q==="compromisso"){const n=new Date(),m=Math.min((n.getHours()+1)*60,22*60);newEvent(iso(n),m);return;}
+      if(q==="tarefa"){
+        if(mode!=="planner"||closedMode===mode){closedMode=null;mode="planner";document.body.dataset.mode="planner";render();}
+        const b=$('.adder[data-list^="hoje|"] .ab.plus')||$('.adder[data-list^="semana|"] .ab.plus')||$(".adder .ab.plus");
+        if(b){b.scrollIntoView({block:"center"});b.click();}
+      }
+    }catch(e){}
+  },500);
+})();
 
 gInit();
 calInit();

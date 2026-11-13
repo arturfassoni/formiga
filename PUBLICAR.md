@@ -147,12 +147,16 @@ O app mostra o que entendeu e só cria depois da confirmação. A chave do Gemin
 5. Volte ao Worker → **Settings → Variables and Secrets → Add**:
    - Tipo **Secret**, nome `GEMINI_API_KEY`, valor: a chave do 5.1
    - Tipo **Text**, nome `ALLOWED_ORIGIN`, valor: `https://SEU-USUARIO.github.io` (sem barra no final)
+   - Para o **login que não expira** (v39): tipo **Text**, nome `GOOGLE_CLIENT_ID`, valor: o Client ID do `index.html`; tipo **Secret**, nome `GOOGLE_CLIENT_SECRET`, valor: o segredo do mesmo cliente (Google Cloud → Google Auth Platform → Clients → `Formiga web` → Client secret)
    - **Deploy**
 6. Copie o endereço do Worker: `https://formiga-assistente.SEU-SUBDOMINIO.workers.dev`
 
 ### 5.3 Ligar no app
 1. No GitHub, edite o `index.html`, busque `COLE_AQUI_A_URL_DO_WORKER` e cole o endereço do Worker entre as aspas.
 2. **Commit changes**. O botão do microfone aparece no app.
+
+### Login sem expirar
+Com o Worker ligado e as duas variáveis do Google, o app usa o fluxo de código: o primeiro login guarda um token de renovação (`formiga-rt`) e o app pega tokens novos sozinho, sem pop-up. Se não vier token de renovação (conta que já autorizou antes), revogue o acesso do Formiga em myaccount.google.com/permissions e entre de novo.
 
 ### Bom saber
 - O plano gratuito da Cloudflare e a cota gratuita do Gemini cobrem com folga um grupo de amigos e família. A cota do Gemini é por projeto, ou seja, dividida entre todos.

@@ -4,7 +4,10 @@
 //   GEMINI_API_KEY  (Secret)  chave do Google AI Studio
 //   ALLOWED_ORIGIN  (Text)    ex.: https://seu-usuario.github.io  (pode ter várias, separadas por vírgula)
 //   MODEL           (Text, opcional) ex.: gemini-3.1-flash-lite
+//   GOOGLE_CLIENT_ID      (Text)    o mesmo Client ID do index.html (login sem expirar)
+//   GOOGLE_CLIENT_SECRET  (Secret)  o segredo do mesmo cliente, no Google Cloud
 // O Worker não guarda nada: só repassa o texto e devolve as ações.
+// Rotas /auth/code e /auth/refresh: trocam o código do login do Google por um token que se renova sozinho.
 
 const SCHEMA = {
   type: "OBJECT",
@@ -78,6 +81,20 @@ export default {
 
     let b;
     try { b = await req.json(); } catch { return json({ erro: "Pedido inválido" }, 400, cors); }
+    const path = new URL(req.url).pathname;
+    if (path === "/auth/code" || path === "/auth/refresh") {
+      if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return json({ erro: "Login não configurado" }, 500, cors);
+      const form = new URLSearchParams({ client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET });
+      if (path === "/auth/code") {
+        form.set("grant_type", "authorization_code"); form.set("redirect_uri", "postmessage"); form.set("code", String(b.code || ""));
+      } else {
+        form.set("grant_type", "refresh_token"); form.set("refresh_token", String(b.refresh_token || ""));
+      }
+      const g = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form });
+      const d = await g.json().catch(() => ({}));
+      if (!g.ok) return json({ erro: d.error || "erro", invalido: d.error === "invalid_grant" }, g.status === 400 ? 400 : 502, cors);
+      return json({ access_token: d.access_token, expires_in: d.expires_in, scope: d.scope, refresh_token: d.refresh_token || undefined }, 200, cors);
+    }
     const texto = String(b.texto || "").slice(0, 600).trim();
     if (!texto) return json({ acoes: [] }, 200, cors);
 
