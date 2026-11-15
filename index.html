@@ -3795,7 +3795,7 @@ $("#gvClose").onclick=()=>gvdlg.close();
 gvdlg.addEventListener("click",e=>{if(e.target===gvdlg)gvdlg.close();});
 
 /* ---------- Assistente (Gemini via Cloudflare Worker) ---------- */
-const ASSIST_URL="COLE_AQUI_A_URL_DO_WORKER";
+const ASSIST_URL="https://formiga-assistente.fassoni2.workers.dev";
 const assistOn=!ASSIST_URL.startsWith("COLE_AQUI");
 const DIAS_LONGOS=["domingo","segunda-feira","terça-feira","quarta-feira","quinta-feira","sexta-feira","sábado"];
 const xdlg=$("#xdlg");let xActs=[];

@@ -31,13 +31,13 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 - **Listas e notas no computador:** `isSwipe()` é verdadeiro em todo modo que não seja Planner, então Listas e Notas usam o layout em botões (caixa aberta, botão por lista/nota, clique abre) também no desktop.
 - **Cuidado ao declarar:** `const` de diálogos (ex.: `gedlg`) são declarados no meio do script; usá-los antes da declaração derruba o script inteiro e `node --check` não pega. Registrar handlers só depois da declaração.
 - **Excluir:** sem confirmação; o "Desfazer" (`offerUndo`, 7 s) restaura o estado. Para eventos do Google, o desfazer recria o evento. "Apagar tudo e começar do zero" ainda confirma.
-- **Assistente por voz:** `worker.js` (Cloudflare). `ASSIST_URL` ainda é o texto de preenchimento em `index.html`, ou seja, **não está configurado**.
+- **Assistente por voz e texto:** `worker.js` na Cloudflare (`ASSIST_URL` configurado na v40).
 - Arquivos de apoio: `PUBLICAR.md` (guia de publicação), `NOTAS-IA.md`, `privacidade.html`.
 
 - **v37:** cores de evento = as 11 cores do Google (`GCOL`, `gcHex`, `evTone`); eventos do Google gravam `colorId` (aparece no Google Agenda), compromissos do Formiga guardam `color:"gNN"`; `fcolor` antigo ainda é lido. Linha da hora atual (`.nowline`, `nowTick`). Agenda do Google carrega janela larga (-14/+43 dias) e guarda `calRaw` por 10 min (navegar não espera rede). Eventos que se repetem: edita, move e exclui só a ocorrência (PATCH no id da instância; mover de agenda desativado). Botão ✓ no formulário de nova tarefa. Menu: "Importar notas do Keep (.html)" (`keepParse`, vai para a caixa de notas "Keep", ignora notas na lixeira; checklist vira linhas ☐/☑).
 - **Botões da agenda na lateral (v38):** opção no menu (`#agSideBtn`, `formiga-agside` por aparelho). Em vez dos botões de texto no topo, coluna à direita (`.agside`) com botões redondos H, 3, 5, 7, M, depois ‹, › e + (a barra de cima some; só o Mês mantém a linha com o nome do mês). A classe da agenda é `agsd` (a classe `.side` já é da barra lateral do app; não reutilizar).
 
-- **v39 (não publicada):** ícone B (formiga com folha, fundo escuro; `formiga-icone.svg`, PNGs 48/180/192/512/maskable), logo interno novo (viewBox 88 76 356 368, cores `--ant/--leaf/--vein`), boas-vindas enxuta (`.tips`), atalhos do ícone no manifesto (`?novo=tarefa|compromisso|assistente`, tratados antes de `gInit()`), login sem expirar: `authRefresh`/`authExchange` + rotas `/auth/code` e `/auth/refresh` no `worker.js` (só ativas quando `ASSIST_URL` está configurado; `formiga-rt` guarda o refresh token). Sem Worker, tudo cai no fluxo antigo de 1 h. Nada disso foi testado com Worker real.
+- **v39 (publicada):** ícone B (formiga com folha, fundo escuro; `formiga-icone.svg`, PNGs 48/180/192/512/maskable), logo interno novo (viewBox 88 76 356 368, cores `--ant/--leaf/--vein`), boas-vindas enxuta (`.tips`), atalhos do ícone no manifesto (`?novo=tarefa|compromisso|assistente`, tratados antes de `gInit()`), login sem expirar: `authRefresh`/`authExchange` + rotas `/auth/code` e `/auth/refresh` no `worker.js` (só ativas quando `ASSIST_URL` está configurado; `formiga-rt` guarda o refresh token). Sem Worker, tudo cai no fluxo antigo de 1 h. Nada disso foi testado com Worker real.
 
 ## Google Cloud (projeto do Formiga)
 
@@ -47,7 +47,7 @@ PWA de planner, listas, notas e agenda, em um arquivo só (`index.html`, JavaScr
 
 ## Estado atual
 
-Publicado e funcionando (cache `formiga-v38`): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
+Publicado e funcionando (cache `formiga-v40`; Worker em https://formiga-assistente.fassoni2.workers.dev, assistente e login sem expirar ligados): tema claro/escuro, tamanho do texto, Planner com navegação nova, listas e notas (duplicar, compartilhar por texto, colar lista), Agenda do Google com ver, editar, criar, excluir e cor por evento, botão de atualizar, login único, exclusão sem confirmação com desfazer, e a agenda interativa descrita abaixo.
 
 Nada pendente de publicação. Conferir `git status` mesmo assim.
 
