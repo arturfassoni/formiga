@@ -31,7 +31,7 @@ const SCHEMA = {
           lista: { type: "STRING", description: "Para item_lista: uma das listas existentes ou um nome novo." },
           texto: { type: "STRING", description: "Detalhes extras (conteúdo da nota ou observações da tarefa)." }
         },
-        required: ["tipo", "titulo"]
+        required: ["tipo", "titulo", "data", "inicio", "fim", "duracao_min", "ref", "novo_titulo"]
       }
     }
   },
@@ -51,6 +51,12 @@ Tipos de ação:
 - nota: um texto para guardar. "titulo" curto, conteúdo em "texto", "caixa" uma das caixas de notas.
 
 Duração: se a pessoa disser quanto tempo dura ("por 2 horas", "durante 45 minutos", "de uma hora e meia"), preencha duracao_min e deixe "fim" vazio. Sem duração nem fim, deixe os dois vazios.
+Exemplos:
+- "reunião amanhã às 14h por 2 horas" → compromisso, inicio "14:00", fim "", duracao_min 120.
+- "consulta terça às 9 até 10 e meia" → compromisso, inicio "09:00", fim "10:30", duracao_min 0.
+- "muda o dentista para as 15h" (existente "0 | Dentista | 2026-11-16 | 09:00-10:00") → editar_compromisso, ref 0, titulo "Dentista", inicio "15:00", fim "", duracao_min 0, data "", novo_titulo "".
+- "o dentista agora dura 2 horas" → editar_compromisso, ref 0, inicio "", duracao_min 120.
+Para campos que não se aplicam, use "" (texto) ou 0 (número).
 Regras de horário: "às 12" = 12:00; "meio-dia" = 12:00; horas de 1 a 7 sem "da manhã" normalmente são da tarde (ex.: "às 4" = 16:00). Sem fim informado, deixe "fim" vazio.
 Um pedido pode gerar várias ações; vários itens de uma lista viram várias ações item_lista.
 
