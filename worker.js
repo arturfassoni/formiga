@@ -18,12 +18,15 @@ const SCHEMA = {
       items: {
         type: "OBJECT",
         properties: {
-          tipo: { type: "STRING", enum: ["compromisso", "tarefa", "item_lista", "nota"] },
+          tipo: { type: "STRING", enum: ["compromisso", "editar_compromisso", "tarefa", "item_lista", "nota"] },
           titulo: { type: "STRING" },
           data: { type: "STRING", description: "AAAA-MM-DD escolhida da lista de dias. Vazio se não houver." },
           repetir_semanal: { type: "BOOLEAN" },
           inicio: { type: "STRING", description: "HH:MM, 24 horas" },
           fim: { type: "STRING", description: "HH:MM, 24 horas. Vazio se não informado." },
+          duracao_min: { type: "INTEGER", description: "Duração em minutos, se a pessoa disser quanto dura (ex.: 'por 2 horas' = 120, 'de meia hora' = 30). 0 se não informada." },
+          ref: { type: "INTEGER", description: "Para editar_compromisso: o número do compromisso na lista de compromissos existentes." },
+          novo_titulo: { type: "STRING", description: "Para editar_compromisso: novo título, só se a pessoa pediu para renomear." },
           caixa: { type: "STRING", description: "Para tarefa: uma das caixas do planner. Para nota: uma das caixas de notas." },
           lista: { type: "STRING", description: "Para item_lista: uma das listas existentes ou um nome novo." },
           texto: { type: "STRING", description: "Detalhes extras (conteúdo da nota ou observações da tarefa)." }
@@ -42,10 +45,12 @@ Responda somente com o JSON do esquema. Não invente itens que a pessoa não ped
 
 Tipos de ação:
 - compromisso: algo com horário (consulta, aula, reunião). Use "data" da lista de dias. Se a pessoa disser "toda segunda", "todas as terças" etc., use repetir_semanal=true e a data do próximo dia correspondente.
+- editar_compromisso: alterar um compromisso que já existe (mudar horário, dia, duração ou nome). "ref" é o número dele na lista "Compromissos existentes"; "titulo" é o título atual dele. Preencha só os campos que mudam (data, inicio, fim ou duracao_min, novo_titulo); deixe os outros vazios. Se mudar só o horário de início, a duração se mantém. Se não houver um compromisso claramente correspondente, não crie edição: explique em "mensagem".
 - tarefa: algo a fazer, sem horário. "caixa" deve ser a caixa do planner mais adequada. "data" só se a pessoa indicar quando (ex.: "semana que vem" → um dia da próxima semana).
 - item_lista: algo para pôr numa lista (compras, filmes, viagem). "lista" deve ser a lista existente mais adequada; se nenhuma servir, um nome novo curto.
 - nota: um texto para guardar. "titulo" curto, conteúdo em "texto", "caixa" uma das caixas de notas.
 
+Duração: se a pessoa disser quanto tempo dura ("por 2 horas", "durante 45 minutos", "de uma hora e meia"), preencha duracao_min e deixe "fim" vazio. Sem duração nem fim, deixe os dois vazios.
 Regras de horário: "às 12" = 12:00; "meio-dia" = 12:00; horas de 1 a 7 sem "da manhã" normalmente são da tarde (ex.: "às 4" = 16:00). Sem fim informado, deixe "fim" vazio.
 Um pedido pode gerar várias ações; vários itens de uma lista viram várias ações item_lista.
 
@@ -53,6 +58,9 @@ Hoje: ${String(b.hoje || "").slice(0, 40)}
 A semana começa em: ${String(b.inicioSemana || "segunda-feira").slice(0, 20)}
 Próximos dias:
 ${(Array.isArray(b.dias) ? b.dias : []).slice(0, 31).map(s => String(s).slice(0, 40)).join("\n")}
+
+Compromissos existentes (número | título | data | início-fim):
+${(Array.isArray(b.eventos) ? b.eventos : []).slice(0, 60).map(s => String(s).slice(0, 90)).join("\n") || "(nenhum)"}
 
 Caixas do planner: ${lst(b.caixas)}
 Listas: ${lst(b.listas)}
