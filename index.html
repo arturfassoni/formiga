@@ -3351,6 +3351,7 @@ function drawEvent(){
   $("#eDay").value=String(e.day!=null?e.day:1);$("#eDate").value=e.date||"";
   $("#eStart").value=e.start;$("#eEnd").value=e.end;
   const pal=$("#eColors");pal.innerHTML="";
+  if(calDefHex())pal.appendChild(gcalDot(e.color==="gcal",()=>{e.color="gcal";save();drawEvent();}));
   GCOL.forEach(([id,nm])=>{const k="g"+id;const b=document.createElement("button");b.type="button";b.className="dot"+(e.color===k?" on":"");b.style.setProperty("--tone",gcHex(id));b.title=nm;b.setAttribute("aria-label","Cor "+nm);b.onclick=()=>{e.color=k;save();drawEvent();};pal.appendChild(b);});
   $("#eWhere").textContent=$("#eRep").checked?([0,6].includes(+$("#eDay").value)?"Todo ":"Toda ")+$("#eDay").selectedOptions[0].textContent:"";
 }
@@ -3630,8 +3631,10 @@ let calList=[],calPal=null;try{calList=JSON.parse(localStorage.getItem("formiga-
 let calHid=new Set();try{calHid=new Set(JSON.parse(localStorage.getItem("formiga-calhide")||"[]"));}catch(e){}
 let calOv={};try{calOv=JSON.parse(localStorage.getItem("formiga-calcolors")||"{}")||{};}catch(e){}
 const GCOL=[["9","Mirtilo","#5484ed"],["7","Pavão","#46d6db"],["10","Manjericão","#51b749"],["2","Sálvia","#7ae7bf"],["5","Banana","#fbd75b"],["6","Tangerina","#ffb878"],["11","Tomate","#dc2127"],["4","Flamingo","#ff887c"],["3","Uva","#dbadff"],["1","Lavanda","#a4bdfc"],["8","Grafite","#e1e1e1"]];
-const evTone=c=>/^g\d+$/.test(c||"")?gcHex(c.slice(1)):colorVar(c);
-function evNewColor(list){const used=new Set((list||[]).map(e=>e.color));const g=GCOL.find(x=>!used.has("g"+x[0]));return "g"+(g?g[0]:"9");}
+function calDefHex(){const c=calList.find(x=>x.primary)||calList[0];if(!c)return "";return calOv[c.id]?(PALETTE.includes(calOv[c.id])?colorVar(calOv[c.id]):calOv[c.id]):(c.color||"");}
+const evTone=c=>c==="gcal"?(calDefHex()||colorVar("gray")):/^g\d+$/.test(c||"")?gcHex(c.slice(1)):colorVar(c);
+function gcalDot(on,fn){const b=document.createElement("button");b.type="button";b.className="dot"+(on?" on":"");b.style.setProperty("--tone",calDefHex());b.title="Cor padrão da agenda";b.setAttribute("aria-label","Cor padrão da agenda");b.onclick=fn;return b;}
+function evNewColor(list){if(calDefHex())return "gcal";const used=new Set((list||[]).map(e=>e.color));const g=GCOL.find(x=>!used.has("g"+x[0]));return "g"+(g?g[0]:"9");}
 function gcHex(id){if(calPal&&calPal[id])return calPal[id].background;const g=GCOL.find(x=>x[0]===id);return g?g[2]:"";}
 function calColor(c,e){
   const fc=e&&e.extendedProperties&&e.extendedProperties.private&&e.extendedProperties.private.fcolor;if(fc&&PALETTE.includes(fc))return colorVar(fc);
@@ -3736,7 +3739,7 @@ function geCalTone(){const c=calList.find(x=>x.id===$("#geCal").value);if(!c)ret
 function geDrawColors(){
   const pal=$("#geColors");pal.innerHTML="";const fm=geFm();
   if(!fm){const d=document.createElement("button");d.type="button";d.className="dot"+(!geColor&&!geGc?" on":"");d.style.setProperty("--tone",geCalTone());d.title="Cor da agenda";d.setAttribute("aria-label","Cor da agenda");d.onclick=()=>{geColor="";geGc="";geDrawColors();};pal.appendChild(d);}
-  if(fm){GCOL.forEach(([id,nm])=>{const k="g"+id;const b=document.createElement("button");b.type="button";b.className="dot"+(geColor===k?" on":"");b.style.setProperty("--tone",gcHex(id));b.title=nm;b.setAttribute("aria-label","Cor "+nm);b.onclick=()=>{geColor=k;geDrawColors();};pal.appendChild(b);});return;}
+  if(fm){if(calDefHex())pal.appendChild(gcalDot(geColor==="gcal",()=>{geColor="gcal";geDrawColors();}));GCOL.forEach(([id,nm])=>{const k="g"+id;const b=document.createElement("button");b.type="button";b.className="dot"+(geColor===k?" on":"");b.style.setProperty("--tone",gcHex(id));b.title=nm;b.setAttribute("aria-label","Cor "+nm);b.onclick=()=>{geColor=k;geDrawColors();};pal.appendChild(b);});return;}
   GCOL.forEach(([id,nm])=>{const b=document.createElement("button");b.type="button";b.className="dot"+(geGc===id?" on":"");b.style.setProperty("--tone",gcHex(id));b.title=nm;b.setAttribute("aria-label","Cor "+nm);b.onclick=()=>{geGc=id;geColor="";geDrawColors();};pal.appendChild(b);});
 }
 $("#geDescBtn").onclick=()=>{geDescOn=true;geAllUI();$("#geDesc").focus();};
