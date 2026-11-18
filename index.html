@@ -3735,7 +3735,7 @@ function geAllUI(){
   if(!$("#geNote").dataset.fixed)$("#geNote").textContent=fm?($("#geRep").checked?"Vai se repetir toda semana, no mesmo dia da semana.":""):(calCanWrite?"":"Para salvar, o Formiga precisa da sua permissão para editar eventos. Ao salvar, o Google vai pedir.");
 }
 let gePrevCal="",geDescOn=false,geColor="",geGc="";
-function geCalTone(){const c=calList.find(x=>x.id===$("#geCal").value);if(!c)return colorVar("gray");return calOv[c.id]?(PALETTE.includes(calOv[c.id])?colorVar(calOv[c.id]):calOv[c.id]):(c.backgroundColor||colorVar("gray"));}
+function geCalTone(){const c=calList.find(x=>x.id===$("#geCal").value);if(!c)return colorVar("gray");return calOv[c.id]?(PALETTE.includes(calOv[c.id])?colorVar(calOv[c.id]):calOv[c.id]):(c.color||colorVar("gray"));}
 function geDrawColors(){
   const pal=$("#geColors");pal.innerHTML="";const fm=geFm();
   if(!fm){const d=document.createElement("button");d.type="button";d.className="dot"+(!geColor&&!geGc?" on":"");d.style.setProperty("--tone",geCalTone());d.title="Cor da agenda";d.setAttribute("aria-label","Cor da agenda");d.onclick=()=>{geColor="";geGc="";geDrawColors();};pal.appendChild(d);}
